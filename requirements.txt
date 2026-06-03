@@ -1,0 +1,2 @@
+# Core dependencies for Neural Network Project
+numpy>=1.21.0
