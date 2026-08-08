@@ -6,12 +6,10 @@
 #include "./libs/libidx3/idx3_io.h"
 
 int main(void) {
-    const char dataPath[] = "data/training/train-images.idx3-ubyte";
-    Matrix ** matrix_list = getIDXdata(dataPath);
+    const char trainingDataPath[] = "data/training/train-images.idx3-ubyte";
 
-    for(int i = 0; i < 10; i++) {
-        printMatrix(matrix_list[i], 28, 28);
-    }
+    MatrixList * matrix_list = getIDXdata(trainingDataPath);
+    printMatrixList(matrix_list, 10);
     free(matrix_list);
     return 0;
 }

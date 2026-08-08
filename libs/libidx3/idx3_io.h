@@ -1,6 +1,7 @@
 #ifndef IDX3_IO_H
 #define IDX3_IO_H
 
+#include <stdio.h>
 #include <stdint.h>
 #include "../matrix/matrix.h"
 
@@ -11,16 +12,16 @@ typedef struct {
     uint32_t matrix_count;
     uint32_t matrix_rows;
     uint32_t matrix_columns;
-} IDXMeta;
+} IDXMetadata;
 
 uint32_t flip_endian(uint32_t num);
 
-Matrix ** getIDXdata(const char *path);
+MatrixList * getIDXdata(const char * path);
 
-IDXMeta readIDXMeta(FILE *pFile);
+IDXMetadata readIDXMetadata(FILE *pFile);
 
-void readIDXData(IDXMeta idxmeta, FILE * pFile, Matrix **pList);
+void buildIDXMatrixList(FILE * pFile, MatrixList * pMatrixList);
 
-Matrix * fillIDXData(uint32_t rows, uint32_t cols, FILE * pFile);
+Matrix * createIDXDataMatrix(uint32_t rows, uint32_t columns, FILE * pFile);
 
 #endif
