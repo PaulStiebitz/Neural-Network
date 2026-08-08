@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "matrix.h"
 
 Matrix * createMatrix(uint32_t rows, uint32_t columns) {
@@ -38,4 +39,13 @@ void removeMatrix(Matrix *pMatrix) {
     }
     free(pMatrix->data);
     free(pMatrix);
+}
+
+void printMatrix(Matrix *pMatrix, uint32_t rows, uint32_t columns) {
+    for(uint32_t i = 0; i < rows; i++) {
+        for(uint32_t j = 0; j < columns; j++) {
+            printf("%d", pMatrix->data[i][j]);
+        }
+        printf("\n");
+    }
 }

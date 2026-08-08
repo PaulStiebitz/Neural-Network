@@ -14,4 +14,6 @@ Matrix * createMatrix(uint32_t rows, uint32_t columns);
 
 void removeMatrix(Matrix *pMatrix);
 
+void printMatrix(Matrix *pMatrix, uint32_t rows, uint32_t columns);
+
 #endif

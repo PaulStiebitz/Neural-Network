@@ -11,7 +11,7 @@
       "cwd": "c:/Users/Der Grinder/Desktop/coding/Neural_Network",
       "program": "c:/Users/Der Grinder/Desktop/coding/Neural_Network/build/Debug/outDebug",
       "MIMode": "gdb",
-      "miDebuggerPath": "C:/MinGW/bin/gdb.exe",
+      "miDebuggerPath": "C:\\MinGW\\bin\\gdb.exe",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",

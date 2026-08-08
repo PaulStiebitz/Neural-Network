@@ -37,29 +37,37 @@ uint32_t flip_endian(uint32_t num) {
 Bytes 0–1: Always zero 0x00 0x00
 Byte 2: Data type code (0x08 for unsigned byte)
 Byte 3: Number of dimensions (0x03 for 3D matrix)
-Bytes 4–7: Number of images (32-bit big-endian integer)
+Bytes 4–7: Number of images/matrices (32-bit big-endian integer)
 Bytes 8–11: Number of rows per image (32-bit big-endian integer)
 Bytes 12–15: Number of columns per image (32-bit big-endian integer)
 Bytes 16+: Raw pixel data as a continuous stream of unsigned bytes
 
 */
 
-void getIDXdata(const char * path) {
+Matrix ** getIDXdata(const char * path) {
     if(path == NULL) {
-        return;
+        return NULL;
     }
     FILE *file = fopen(path, "rb");
-    IDXMeta meta = readIDXMeta(file);
 
-    if(meta.dimension == 0) {
-        return;
+    if(file == NULL) {
+        return NULL;
     }
-    printf("dim: %d\n", meta.bytes);
-    if(meta.dimension == 1) {
-        printf("1D");
-    } else {
-        printf("3D");
+
+    IDXMeta idxmeta = readIDXMeta(file);
+    size_t matrix_list_size =  sizeof(Matrix) * idxmeta.matrix_count;
+    Matrix ** matrix_list = malloc(matrix_list_size);
+
+    if(matrix_list == NULL) {
+        return NULL;
     }
+
+    readIDXData(idxmeta, file, matrix_list);
+
+    fclose(file);
+    free(file);
+
+    return matrix_list;
 }
 
 IDXMeta readIDXMeta(FILE *pFile) {
@@ -76,30 +84,52 @@ IDXMeta readIDXMeta(FILE *pFile) {
     fread(&idxmeta.zero_bytes, size_uint8_t, 2, pFile);
     fread(&idxmeta.bytes, size_uint8_t, 1, pFile);
     fread(&idxmeta.dimension, size_uint8_t, 1, pFile);
-    fread(&idxmeta.image_count, size_uint32_t, 1, pFile);
-    fread(&idxmeta.image_rows, size_uint32_t, 1, pFile);
-    fread(&idxmeta.image_columns, size_uint32_t, 1, pFile);
+    fread(&idxmeta.matrix_count, size_uint32_t, 1, pFile);
+    fread(&idxmeta.matrix_rows, size_uint32_t, 1, pFile);
+    fread(&idxmeta.matrix_columns, size_uint32_t, 1, pFile);
 
-    // 8 Bit values are already correct!
-    idxmeta.image_count = flip_endian(idxmeta.image_count);
-    idxmeta.image_rows = flip_endian(idxmeta.image_rows);
-    idxmeta.image_columns = flip_endian(idxmeta.image_columns);
+    // 1 Byte fields are already correct!
+    idxmeta.matrix_count = flip_endian(idxmeta.matrix_count);
+    idxmeta.matrix_rows = flip_endian(idxmeta.matrix_rows);
+    idxmeta.matrix_columns = flip_endian(idxmeta.matrix_columns);
     return idxmeta;
 }
 
-/*
-void readIDX3Data(const char *path) {
-        printf("Magic: %d\nImage count: %d\nImage rows: %d\nImage columns: %d",
-            magic, image_count, image_rows, image_columns);
+void readIDXData(IDXMeta idxmeta, FILE * pFile, Matrix ** pList) {
+    printf("Reading [IDXData]:\n"
+           "Matrix Dimension: %d\n"
+           "Matrix count: %d\n"
+           "Matrix rows: %d\n"
+           "Matrix columns: %d\n",
+           idxmeta.dimension, idxmeta.matrix_count, idxmeta.matrix_rows, idxmeta.matrix_columns
+          );
 
-        fclose(file);
-        free(file);
-   return;
+
+   for(uint32_t i = 0; i < idxmeta.matrix_count; i++) {
+        pList[i] = fillIDXData(idxmeta.matrix_rows, idxmeta.matrix_columns, pFile);
+   }
 }
 
-void readIDX1Data(char *path) {
-    return;
-}
+Matrix * fillIDXData(uint32_t rows, uint32_t columns, FILE * pFile) {
+    Matrix * matrix = createMatrix(rows, columns);
+    if(matrix == NULL) {
+        return NULL;
+    }
+    uint32_t threshold = 127;
 
-*/
+    for(uint32_t i = 0; i < rows; i++) {
+        for(uint32_t j = 0; j < columns; j++) {
+            uint8_t tmp_pixel = 0;
+            fread(&tmp_pixel, sizeof(uint8_t), 1, pFile);
+
+            if(tmp_pixel >= threshold) {
+                matrix->data[i][j] = 1;
+            } else {
+                matrix->data[i][j] = 0;
+            }
+           //matrix->data[i][j] = tmp_pixel;
+        }
+    }
+    return matrix;
+}
 
