@@ -3,6 +3,7 @@
 #include <string.h>
 #include "matrix.h"
 
+/* Allocates a Matrix with the given dimensions. Returns NULL on failure. */
 Matrix * createMatrix(uint32_t rows, uint32_t columns) {
     Matrix * matrix  = malloc(sizeof(Matrix));
     if(matrix == NULL) {
@@ -19,6 +20,7 @@ Matrix * createMatrix(uint32_t rows, uint32_t columns) {
     return matrix;
 }
 
+/* Frees a Matrix and its data buffer. No-op if pMatrix is NULL. */
 void freeMatrix(Matrix *pMatrix) {
     if(pMatrix == NULL) {
         return;
@@ -28,6 +30,7 @@ void freeMatrix(Matrix *pMatrix) {
     free(pMatrix);
 }
 
+/* Allocates a MatrixList of 'length' matrices, each of size rows x columns. Returns NULL on failure. */
 MatrixList * createMatrixList(uint32_t length, uint32_t rows, uint32_t columns) {
     size_t MatrixList_mem_req = sizeof(MatrixList);
     MatrixList * matrix_list = malloc(MatrixList_mem_req);
@@ -42,7 +45,7 @@ MatrixList * createMatrixList(uint32_t length, uint32_t rows, uint32_t columns) 
 
     matrix_list->list = malloc(Matrix_innerList_mem_req);
     if(matrix_list->list == NULL) {
-        freeMatrixList(matrix_list);
+        free(matrix_list);
         return NULL;
     }
 
@@ -50,8 +53,9 @@ MatrixList * createMatrixList(uint32_t length, uint32_t rows, uint32_t columns) 
         matrix_list->list[i] = createMatrix(rows, columns);
         if(matrix_list->list[i] == NULL) {
             for(uint32_t j = 0; j < i; j++) {
-                free(matrix_list->list[j]);
+                freeMatrix(matrix_list->list[j]);
             }
+            free(matrix_list->list);
             free(matrix_list);
             return NULL;
         }
@@ -59,6 +63,7 @@ MatrixList * createMatrixList(uint32_t length, uint32_t rows, uint32_t columns) 
     return matrix_list;
 }
 
+/* Frees all matrices in the list, the list array, and the MatrixList itself. */
 void freeMatrixList(MatrixList *pMatrixList) {
     for(uint32_t i = 0; i < pMatrixList->list_length; i++) {
         freeMatrix(pMatrixList->list[i]);
@@ -67,6 +72,7 @@ void freeMatrixList(MatrixList *pMatrixList) {
     free(pMatrixList);
 }
 
+/* Prints all elements of a matrix row by row. pDataType: "int" or "float". */
 void printMatrix(const Matrix *pMatrix, char *pDataType) {
     uint32_t matrixIndex = 0;
     for(uint32_t i = 0; i < pMatrix->rows; i++) {
@@ -83,6 +89,7 @@ void printMatrix(const Matrix *pMatrix, char *pDataType) {
     printf("\n");
 }
 
+/* Prints up to pPrintLimit matrices from the list. If pPrintLimit is 0, prints all. */
 void printMatrixList(const MatrixList * pMatrix_list, uint32_t pPrintLimit, char *pDataType) {
     uint32_t printLimit = 0;
     if(pPrintLimit > 0) {
@@ -101,6 +108,7 @@ void printMatrixList(const MatrixList * pMatrix_list, uint32_t pPrintLimit, char
     }
 }
 
+/* Flattens all matrices in the list into a single column vector. Returns NULL on failure. */
 Matrix *MatrixListToVector(const MatrixList *pMatrixList) {
     if(pMatrixList == NULL) {
         return NULL;

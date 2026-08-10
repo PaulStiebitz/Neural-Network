@@ -27,6 +27,7 @@ A B C D
 
 */
 
+/* Reverses the byte order of a 32-bit integer (big-endian to little-endian). */
 uint32_t flip_endian(uint32_t num) {
     return ((num >> 24) & 0xff) |
            ((num << 8) & 0xff0000) |
@@ -43,6 +44,7 @@ Bytes 12–15: Number of columns per image (32-bit big-endian integer)
 Bytes 16+: Raw pixel data as a continuous stream of unsigned bytes
 
 */
+/* Opens an IDX3 file at path, reads its metadata and pixel data, returns a MatrixList. Returns NULL on failure. */
 MatrixList * getIDXDataMatrixList(const char * path) {
     if(path == NULL) {
         return NULL;
@@ -58,19 +60,14 @@ MatrixList * getIDXDataMatrixList(const char * path) {
     uint32_t matrix_rows = idxMetadata.matrix_rows;
     uint32_t matrix_columns = idxMetadata.matrix_columns;
 
-    size_t matrixList_mem_req = sizeof(MatrixList);
-    MatrixList * matrix_list = malloc(matrixList_mem_req);
-    if(matrix_list == NULL) {
-        return NULL;
-    }
-
-    matrix_list = createMatrixList(matrix_list_length, matrix_rows, matrix_columns);
+    MatrixList * matrix_list = createMatrixList(matrix_list_length, matrix_rows, matrix_columns);
     createIDXMatrixList(file, matrix_list);
 
     fclose(file);
     return matrix_list;
 }
 
+/* Reads the 16-byte IDX3 file header and returns its fields as IDXMetadata. */
 IDXMetadata readIDXMetadata(FILE *pFile) {
     if(pFile == NULL) {
         IDXMetadata emptyMeta = {0};
@@ -96,6 +93,7 @@ IDXMetadata readIDXMetadata(FILE *pFile) {
     return idxMetadata;
 }
 
+/* Reads pixel data from pFile and fills each matrix in pMatrixList. */
 void createIDXMatrixList(FILE * pFile, MatrixList * pMatrixList) {
     printf("Reading [IDXData]:\n"
            "Matrix count: %d\n"
@@ -109,6 +107,7 @@ void createIDXMatrixList(FILE * pFile, MatrixList * pMatrixList) {
    }
 }
 
+/* Reads one image from pFile and returns it as a binary Matrix (0 or 1 per pixel). */
 Matrix * createIDXDataMatrix(uint32_t rows, uint32_t columns, FILE * pFile) {
     Matrix * matrix = createMatrix(rows, columns);
     if(matrix == NULL) {
