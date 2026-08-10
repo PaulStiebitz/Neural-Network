@@ -125,12 +125,12 @@ Matrix *MatrixListToVector(const MatrixList *pMatrixList) {
 
     uint32_t vector_index = 0;
     for(uint32_t i = 0; i < pMatrixList->list_length; i++) {
+        Matrix * current_matrix = pMatrixList->list[i];
         for(uint32_t j = 0; j < matrix_elements; j++) {
-            Matrix * current_matrix = pMatrixList->list[i];
             float current_data = current_matrix->data[j];
             vector->data[vector_index] = current_data;
+            vector_index++;
         }
-        vector_index++;
     }
     return vector;
 }

@@ -11,8 +11,11 @@ int main(void) {
     MatrixList * matrix_list = getIDXDataMatrixList(trainingDataPath);
     Matrix * input = MatrixListToVector(matrix_list);
 
-    printMatrixList(matrix_list, 0, "int");
+    printMatrixList(matrix_list, 3, "int");
+    printMatrix(input, "int");
+
     freeMatrixList(matrix_list);
     free(matrix_list);
+    free(input);
     return 0;
 }
