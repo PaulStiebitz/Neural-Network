@@ -42,20 +42,19 @@ MatrixList * createMatrixList(uint32_t length, uint32_t rows, uint32_t columns) 
 
     matrix_list->list = malloc(Matrix_innerList_mem_req);
     if(matrix_list->list == NULL) {
+        freeMatrixList(matrix_list);
         return NULL;
     }
 
-    size_t Matrix_mem_req = sizeof(Matrix);
     for(uint32_t i = 0; i < length; i++) {
-        matrix_list->list[i] = malloc(Matrix_mem_req);
+        matrix_list->list[i] = createMatrix(rows, columns);
         if(matrix_list->list[i] == NULL) {
             for(uint32_t j = 0; j < i; j++) {
-                free(matrix_list->list[i]);
+                free(matrix_list->list[j]);
             }
             free(matrix_list);
             return NULL;
         }
-        matrix_list->list[i] = createMatrix(rows, columns);
     }
     return matrix_list;
 }
@@ -72,9 +71,9 @@ void printMatrix(const Matrix *pMatrix, char *pDataType) {
     uint32_t matrixIndex = 0;
     for(uint32_t i = 0; i < pMatrix->rows; i++) {
         for(uint32_t j = 0; j < pMatrix->columns; j++) {
-            if(strcmp(pDataType, "int")) {
+            if(strcmp(pDataType, "int") == 0) {
                 printf("%d", (uint8_t)pMatrix->data[matrixIndex]);
-            } else if(strcmp(pDataType, "float")) {
+            } else if(strcmp(pDataType, "float") == 0) {
                 printf("%.3f", pMatrix->data[matrixIndex]);
             }
             matrixIndex++;
@@ -94,9 +93,9 @@ void printMatrixList(const MatrixList * pMatrix_list, uint32_t pPrintLimit, char
 
     for(uint32_t i = 0; i < printLimit; i++) {
         printf("%d.th Matrix \n", i + 1);
-        if(strcmp(pDataType, "int")) {
+        if(strcmp(pDataType, "int") == 0) {
                 printMatrix(pMatrix_list->list[i], "int");
-            } else if(strcmp(pDataType, "float")) {
+            } else if(strcmp(pDataType, "float") == 0) {
                 printMatrix(pMatrix_list->list[i], "float");
         }
     }

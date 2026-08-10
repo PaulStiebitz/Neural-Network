@@ -68,7 +68,6 @@ MatrixList * getIDXDataMatrixList(const char * path) {
     createIDXMatrixList(file, matrix_list);
 
     fclose(file);
-    free(file);
     return matrix_list;
 }
 

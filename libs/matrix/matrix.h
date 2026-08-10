@@ -17,7 +17,7 @@ typedef struct {
 } MatrixList;
 
 Matrix *createMatrix(uint32_t rows, uint32_t columns);
-void removeMatrix(Matrix *pMatrix);
+void freeMatrix(Matrix *pMatrix);
 void printMatrix(const Matrix *pMatrix, char pDataType[]);
 
 MatrixList *createMatrixList(uint32_t pMatrixListLength, uint32_t rows, uint32_t columns);

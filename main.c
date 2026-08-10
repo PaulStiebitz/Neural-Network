@@ -15,7 +15,6 @@ int main(void) {
     printMatrix(input, "int");
 
     freeMatrixList(matrix_list);
-    free(matrix_list);
-    free(input);
+    freeMatrix(input);
     return 0;
 }
