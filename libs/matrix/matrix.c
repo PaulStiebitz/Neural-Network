@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "matrix.h"
 
 Matrix * createMatrix(uint32_t rows, uint32_t columns) {
@@ -9,23 +10,11 @@ Matrix * createMatrix(uint32_t rows, uint32_t columns) {
     }
     matrix->rows = rows;
     matrix->columns = columns;
-    matrix->data = malloc(sizeof(uint32_t) * rows);
+    matrix->data = malloc(sizeof(float) * rows * columns);
 
     if(matrix->data == NULL) {
         free(matrix);
         return NULL;
-    }
-
-    for(uint32_t i = 0; i < rows; i++) {
-        matrix->data[i] = malloc(sizeof(uint32_t) * columns);
-        if(matrix->data[i] == NULL) {
-            for(uint32_t j = 0; j < i; j++) {
-                free(matrix->data[j]);
-            }
-            free(matrix->data);
-            free(matrix);
-            return NULL;
-        }
     }
     return matrix;
 }
@@ -34,9 +23,7 @@ void freeMatrix(Matrix *pMatrix) {
     if(pMatrix == NULL) {
         return;
     }
-    for(uint32_t i = 0; i < pMatrix->rows; i++) {
-        free(pMatrix->data[i]);
-    }
+
     free(pMatrix->data);
     free(pMatrix);
 }
@@ -77,29 +64,73 @@ void freeMatrixList(MatrixList *pMatrixList) {
     for(uint32_t i = 0; i < pMatrixList->list_length; i++) {
         freeMatrix(pMatrixList->list[i]);
     }
+    free(pMatrixList->list);
     free(pMatrixList);
 }
 
-void printMatrix(Matrix *pMatrix, uint32_t rows, uint32_t columns) {
-    for(uint32_t i = 0; i < rows; i++) {
-        for(uint32_t j = 0; j < columns; j++) {
-            printf("%d", pMatrix->data[i][j]);
+void printMatrix(const Matrix *pMatrix, char *pDataType) {
+    uint32_t matrixIndex = 0;
+    for(uint32_t i = 0; i < pMatrix->rows; i++) {
+        for(uint32_t j = 0; j < pMatrix->columns; j++) {
+            if(strcmp(pDataType, "int")) {
+                printf("%d", (uint8_t)pMatrix->data[matrixIndex]);
+            } else if(strcmp(pDataType, "float")) {
+                printf("%.3f", pMatrix->data[matrixIndex]);
+            }
+            matrixIndex++;
         }
         printf("\n");
     }
     printf("\n");
 }
 
-void printMatrixList(MatrixList * pMatrix_list, uint32_t pPrintLimit) {
+void printMatrixList(const MatrixList * pMatrix_list, uint32_t pPrintLimit, char *pDataType) {
     uint32_t printLimit = 0;
     if(pPrintLimit > 0) {
         printLimit = pPrintLimit;
     } else {
-        printLimit = pPrintLimit;
+        printLimit = pMatrix_list->list_length;
     }
 
     for(uint32_t i = 0; i < printLimit; i++) {
         printf("%d.th Matrix \n", i + 1);
-        printMatrix(pMatrix_list->list[i], pMatrix_list->matrix_rows, pMatrix_list->matrix_columns);
+        if(strcmp(pDataType, "int")) {
+                printMatrix(pMatrix_list->list[i], "int");
+            } else if(strcmp(pDataType, "float")) {
+                printMatrix(pMatrix_list->list[i], "float");
+        }
     }
+}
+
+Matrix *MatrixListToVector(const MatrixList *pMatrixList) {
+    if(pMatrixList == NULL) {
+        return NULL;
+    }
+    size_t matrix_mem_req = sizeof(Matrix);
+    Matrix * vector = malloc(matrix_mem_req);
+    if(vector == NULL) {
+        return NULL;
+    }
+    uint32_t matrix_elements = pMatrixList->matrix_rows * pMatrixList->matrix_columns;
+    uint32_t vector_elements = pMatrixList->list_length * matrix_elements;
+    size_t vector_elements_mem_req = sizeof(float) * vector_elements;
+    vector->data = malloc(vector_elements_mem_req);
+    if(vector->data == NULL) {
+        free(vector);
+        return NULL;
+    }
+
+    vector->rows = vector_elements;
+    vector->columns = 1;
+
+    uint32_t vector_index = 0;
+    for(uint32_t i = 0; i < pMatrixList->list_length; i++) {
+        for(uint32_t j = 0; j < matrix_elements; j++) {
+            Matrix * current_matrix = pMatrixList->list[i];
+            float current_data = current_matrix->data[j];
+            vector->data[vector_index] = current_data;
+        }
+        vector_index++;
+    }
+    return vector;
 }

@@ -6,7 +6,7 @@
 typedef struct {
     uint32_t rows;
     uint32_t columns;
-    uint32_t **data;
+    float *data;
 } Matrix;
 
 typedef struct {
@@ -16,12 +16,14 @@ typedef struct {
     Matrix ** list;
 } MatrixList;
 
-Matrix * createMatrix(uint32_t rows, uint32_t columns);
+Matrix *createMatrix(uint32_t rows, uint32_t columns);
 void removeMatrix(Matrix *pMatrix);
-void printMatrix(Matrix *pMatrix, uint32_t rows, uint32_t columns);
+void printMatrix(const Matrix *pMatrix, char pDataType[]);
 
-MatrixList * createMatrixList(uint32_t pMatrixListLength, uint32_t rows, uint32_t columns);
+MatrixList *createMatrixList(uint32_t pMatrixListLength, uint32_t rows, uint32_t columns);
 void freeMatrixList(MatrixList *pMatrixList);
-void printMatrixList(MatrixList * pMatrix_listm, uint32_t pPrintLimit);
+void printMatrixList(const MatrixList *pMatrix_listm, uint32_t pPrintLimit, char pDataType[]);
+
+Matrix *MatrixListToVector(const MatrixList *pMatrixList);
 
 #endif

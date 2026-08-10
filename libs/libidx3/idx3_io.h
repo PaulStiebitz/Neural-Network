@@ -16,11 +16,11 @@ typedef struct {
 
 uint32_t flip_endian(uint32_t num);
 
-MatrixList * getIDXdata(const char * path);
+MatrixList * getIDXDataMatrixList(const char * path);
 
 IDXMetadata readIDXMetadata(FILE *pFile);
 
-void buildIDXMatrixList(FILE * pFile, MatrixList * pMatrixList);
+void createIDXMatrixList(FILE * pFile, MatrixList * pMatrixList);
 
 Matrix * createIDXDataMatrix(uint32_t rows, uint32_t columns, FILE * pFile);
 

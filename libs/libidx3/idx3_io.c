@@ -43,7 +43,7 @@ Bytes 12–15: Number of columns per image (32-bit big-endian integer)
 Bytes 16+: Raw pixel data as a continuous stream of unsigned bytes
 
 */
-MatrixList * getIDXdata(const char * path) {
+MatrixList * getIDXDataMatrixList(const char * path) {
     if(path == NULL) {
         return NULL;
     }
@@ -57,12 +57,15 @@ MatrixList * getIDXdata(const char * path) {
     uint32_t matrix_list_length = idxMetadata.matrix_count;
     uint32_t matrix_rows = idxMetadata.matrix_rows;
     uint32_t matrix_columns = idxMetadata.matrix_columns;
-    MatrixList * matrix_list = createMatrixList(matrix_list_length, matrix_rows, matrix_columns);
+
+    size_t matrixList_mem_req = sizeof(MatrixList);
+    MatrixList * matrix_list = malloc(matrixList_mem_req);
     if(matrix_list == NULL) {
         return NULL;
     }
 
-    buildIDXMatrixList(file, matrix_list);
+    matrix_list = createMatrixList(matrix_list_length, matrix_rows, matrix_columns);
+    createIDXMatrixList(file, matrix_list);
 
     fclose(file);
     free(file);
@@ -94,7 +97,7 @@ IDXMetadata readIDXMetadata(FILE *pFile) {
     return idxMetadata;
 }
 
-void buildIDXMatrixList(FILE * pFile, MatrixList * pMatrixList) {
+void createIDXMatrixList(FILE * pFile, MatrixList * pMatrixList) {
     printf("Reading [IDXData]:\n"
            "Matrix count: %d\n"
            "Matrix rows: %d\n"
@@ -114,18 +117,19 @@ Matrix * createIDXDataMatrix(uint32_t rows, uint32_t columns, FILE * pFile) {
     }
 
     uint32_t pixel_threshold = 127;
+    uint32_t matrixIndex = 0;
     for(uint32_t i = 0; i < rows; i++) {
         for(uint32_t j = 0; j < columns; j++) {
             uint8_t tmp_pixel = 0;
             fread(&tmp_pixel, sizeof(uint8_t), 1, pFile);
 
             if(tmp_pixel >= pixel_threshold) {
-                matrix->data[i][j] = 1;
+                matrix->data[matrixIndex] = 1;
             } else {
-                matrix->data[i][j] = 0;
+                matrix->data[matrixIndex] = 0;
             }
+            matrixIndex++;
         }
     }
     return matrix;
 }
-

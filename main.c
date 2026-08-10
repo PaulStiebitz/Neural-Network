@@ -8,9 +8,11 @@
 int main(void) {
     const char trainingDataPath[] = "data/training/train-images.idx3-ubyte";
 
-    MatrixList * matrix_list = getIDXdata(trainingDataPath);
-    printMatrixList(matrix_list, 10);
+    MatrixList * matrix_list = getIDXDataMatrixList(trainingDataPath);
+    Matrix * input = MatrixListToVector(matrix_list);
+
+    printMatrixList(matrix_list, 0, "int");
+    freeMatrixList(matrix_list);
     free(matrix_list);
     return 0;
 }
-
