@@ -7,14 +7,12 @@
 
 int main(void) {
     const char trainingDataPath[] = "data/training/train-images.idx3-ubyte";
+    const char trainingLabelPath[] = "data/training/train-labels.idx1-ubyte";
 
-    MatrixList * matrix_list = getIDXDataMatrixList(trainingDataPath);
-    Matrix * input = MatrixListToVector(matrix_list);
+    LabeledMatrixList * labeled_matrix_list = getIDXLabeledMatrixList(trainingDataPath, trainingLabelPath);
 
-    printMatrixList(matrix_list, 3, "int");
-    printMatrix(input, "int");
+    printLabeledMatrixList(labeled_matrix_list, 10, "int");
+    freeLabeledMatrixList(labeled_matrix_list);
 
-    freeMatrixList(matrix_list);
-    freeMatrix(input);
     return 0;
 }

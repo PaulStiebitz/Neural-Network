@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "idx3_io.h"
 #include "../matrix/matrix.h"
@@ -45,31 +46,61 @@ Bytes 16+: Raw pixel data as a continuous stream of unsigned bytes
 
 */
 /* Opens an IDX3 file at path, reads its metadata and pixel data, returns a MatrixList. Returns NULL on failure. */
-MatrixList * getIDXDataMatrixList(const char * path) {
-    if(path == NULL) {
+LabeledMatrixList *getIDXLabeledMatrixList(const char * pData_Path, const char * pLabel_Path) {
+    if(pData_Path == NULL || pLabel_Path == NULL) {
         return NULL;
     }
 
-    FILE *file = fopen(path, "rb");
-    if(file == NULL) {
+    FILE *data_file = fopen(pData_Path, "rb");
+    FILE *label_file = fopen(pLabel_Path, "rb");
+    if(data_file == NULL || label_file == NULL) {
+        if(data_file != NULL) fclose(data_file);
+        if(label_file != NULL) fclose(label_file);
         return NULL;
     }
 
-    IDXMetadata idxMetadata = readIDXMetadata(file);
-    uint32_t matrix_list_length = idxMetadata.matrix_count;
-    uint32_t matrix_rows = idxMetadata.matrix_rows;
-    uint32_t matrix_columns = idxMetadata.matrix_columns;
+    IDXMetadata idx_Data_Metadata = readIDXMetadata(data_file, "IDX3");
+    readIDXMetadata(label_file, "IDX1");
 
-    MatrixList * matrix_list = createMatrixList(matrix_list_length, matrix_rows, matrix_columns);
-    createIDXMatrixList(file, matrix_list);
+    uint32_t data_matrix_list_length = idx_Data_Metadata.matrix_count;
+    uint32_t data_matrix_rows = idx_Data_Metadata.matrix_rows;
+    uint32_t data_matrix_columns = idx_Data_Metadata.matrix_columns;
 
-    fclose(file);
-    return matrix_list;
+    LabeledMatrixList * labeled_matrix_list = createLabeledMatrixList(data_matrix_list_length, data_matrix_rows, data_matrix_columns);
+    fillIDXLabeledMatrixList(data_file, label_file, labeled_matrix_list);
+
+    fclose(data_file);
+    fclose(label_file);
+    return labeled_matrix_list;
 }
 
 /* Reads the 16-byte IDX3 file header and returns its fields as IDXMetadata. */
-IDXMetadata readIDXMetadata(FILE *pFile) {
-    if(pFile == NULL) {
+
+/*
+IDX3
+Byte 0-1 : 00 00
+2
+Byte 2 : 08
+3
+Byte 3 : 03
+4
+Byte 4-7 : Anzahl Bilder
+5
+Byte 8-11 : Zeilen
+6
+Byte 12-15 : Spalten
+
+IDX1
+Byte 0-1 : 00 00
+2
+Byte 2 : 08
+3
+Byte 3 : 01
+4
+Byte 4-7 : Anzahl Labels
+*/
+IDXMetadata readIDXMetadata(FILE *pIDX_file, char idx_format[]) {
+    if(pIDX_file == NULL) {
         IDXMetadata emptyMeta = {0};
         return emptyMeta;
     }
@@ -79,55 +110,73 @@ IDXMetadata readIDXMetadata(FILE *pFile) {
     size_t size_uint32_t = sizeof(uint32_t);
     size_t size_uint8_t = sizeof(uint8_t);
 
-    fread(&idxMetadata.zero_bytes, size_uint8_t, 2, pFile);
-    fread(&idxMetadata.bytes, size_uint8_t, 1, pFile);
-    fread(&idxMetadata.dimension, size_uint8_t, 1, pFile);
-    fread(&idxMetadata.matrix_count, size_uint32_t, 1, pFile);
-    fread(&idxMetadata.matrix_rows, size_uint32_t, 1, pFile);
-    fread(&idxMetadata.matrix_columns, size_uint32_t, 1, pFile);
-
+    fread(&idxMetadata.zero_bytes, size_uint8_t, 2, pIDX_file);
+    fread(&idxMetadata.bytes, size_uint8_t, 1, pIDX_file);
+    fread(&idxMetadata.dimension, size_uint8_t, 1, pIDX_file);
+    fread(&idxMetadata.matrix_count, size_uint32_t, 1, pIDX_file);
+    if(strcmp(idx_format, "IDX3") == 0) {
+        fread(&idxMetadata.matrix_rows, size_uint32_t, 1, pIDX_file);
+        fread(&idxMetadata.matrix_columns, size_uint32_t, 1, pIDX_file);
+        idxMetadata.matrix_rows = flip_endian(idxMetadata.matrix_rows);
+        idxMetadata.matrix_columns = flip_endian(idxMetadata.matrix_columns);
+    } else if(strcmp(idx_format, "IDX1") == 0) {
+        idxMetadata.matrix_rows = 1;
+    }
     // 1 Byte fields are already correct!
     idxMetadata.matrix_count = flip_endian(idxMetadata.matrix_count);
-    idxMetadata.matrix_rows = flip_endian(idxMetadata.matrix_rows);
-    idxMetadata.matrix_columns = flip_endian(idxMetadata.matrix_columns);
+    printf("Reading [IDXData]:\n"
+           "Dimension: %d\n"
+           "Matrix count: %d\n"
+           "Matrix rows: %d\n"
+           "Matrix columns: %d\n",
+           idxMetadata.dimension, idxMetadata.matrix_count, idxMetadata.matrix_rows, idxMetadata.matrix_columns
+          );
     return idxMetadata;
 }
 
 /* Reads pixel data from pFile and fills each matrix in pMatrixList. */
-void createIDXMatrixList(FILE * pFile, MatrixList * pMatrixList) {
-    printf("Reading [IDXData]:\n"
-           "Matrix count: %d\n"
-           "Matrix rows: %d\n"
-           "Matrix columns: %d\n",
-           pMatrixList->list_length, pMatrixList->matrix_rows, pMatrixList->matrix_columns
-          );
+void fillIDXLabeledMatrixList(FILE * pData_File, FILE * pLabel_file, LabeledMatrixList * pLabeled_matrix_list) {
+    if(pData_File == NULL || pLabel_file == NULL || pLabeled_matrix_list == NULL) {
+        return;
+    }
 
-   for(uint32_t i = 0; i < pMatrixList->list_length; i++) {
-        pMatrixList->list[i] = createIDXDataMatrix(pMatrixList->matrix_rows, pMatrixList->matrix_columns, pFile);
-   }
+    for(uint32_t i = 0; i < pLabeled_matrix_list->list_length; i++) {
+        LabeledMatrix * current_labeled_matrix = pLabeled_matrix_list->list[i];
+        fillLabeledMatrix(pData_File, pLabel_file, current_labeled_matrix);
+        if(pLabeled_matrix_list->list[i] == NULL) {
+            for(uint32_t j = 0; j < i; j++) {
+                freeLabeledMatrix(pLabeled_matrix_list->list[j]);
+                free(pLabeled_matrix_list);
+                return;
+            }
+        }
+    }
 }
 
 /* Reads one image from pFile and returns it as a binary Matrix (0 or 1 per pixel). */
-Matrix * createIDXDataMatrix(uint32_t rows, uint32_t columns, FILE * pFile) {
-    Matrix * matrix = createMatrix(rows, columns);
-    if(matrix == NULL) {
-        return NULL;
+void fillLabeledMatrix(FILE *pData_file, FILE * pLabel_file, LabeledMatrix *pLabeled_matrix) {
+    if(pData_file == NULL || pLabel_file == NULL || pLabeled_matrix == NULL) {
+        return;
     }
+    uint32_t rows = pLabeled_matrix->matrix->rows;
+    uint32_t columns = pLabeled_matrix->matrix->columns;
 
-    uint32_t pixel_threshold = 127;
+    uint8_t tmp_label = 0;
+    fread(&tmp_label, sizeof(uint8_t), 1, pLabel_file);
+    pLabeled_matrix->label = tmp_label;
+
+    uint8_t threshold = 127;
     uint32_t matrixIndex = 0;
     for(uint32_t i = 0; i < rows; i++) {
         for(uint32_t j = 0; j < columns; j++) {
             uint8_t tmp_pixel = 0;
-            fread(&tmp_pixel, sizeof(uint8_t), 1, pFile);
-
-            if(tmp_pixel >= pixel_threshold) {
-                matrix->data[matrixIndex] = 1;
+            fread(&tmp_pixel, sizeof(uint8_t), 1, pData_file);
+            if(tmp_pixel >= threshold) {
+                 pLabeled_matrix->matrix->data[matrixIndex] = 1;
             } else {
-                matrix->data[matrixIndex] = 0;
+                pLabeled_matrix->matrix->data[matrixIndex] = 0;
             }
             matrixIndex++;
         }
     }
-    return matrix;
 }

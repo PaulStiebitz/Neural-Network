@@ -30,46 +30,83 @@ void freeMatrix(Matrix *pMatrix) {
     free(pMatrix);
 }
 
+LabeledMatrix * createLabeledMatrix(uint32_t pRows, uint32_t pColumns) {
+    size_t labeled_matrix_mem_req = sizeof(LabeledMatrix);
+    LabeledMatrix *labeled_matrix = malloc(labeled_matrix_mem_req);
+    if(labeled_matrix == NULL) {
+        return NULL;
+    }
+    labeled_matrix->label = 0;
+    size_t labeled_matrix_inner_matrix_mem_req = sizeof(Matrix);
+    labeled_matrix->matrix = malloc(labeled_matrix_inner_matrix_mem_req);
+
+    if(labeled_matrix->matrix == NULL) {
+        free(labeled_matrix);
+        return NULL;
+    }
+
+    size_t labeled_matrix_inner_data_mem_req = sizeof(float) * pRows * pColumns;
+    labeled_matrix->matrix->data = malloc(labeled_matrix_inner_data_mem_req);
+    if(labeled_matrix->matrix->data == NULL) {
+        freeMatrix(labeled_matrix->matrix);
+        free(labeled_matrix);
+        return NULL;
+    }
+    labeled_matrix->matrix->rows = pRows;
+    labeled_matrix->matrix->columns = pColumns;
+
+    return labeled_matrix;
+}
+
+void freeLabeledMatrix(LabeledMatrix *pLabeled_Matrix) {
+    if(pLabeled_Matrix == NULL) {
+        return;
+    }
+    freeMatrix(pLabeled_Matrix->matrix);
+    free(pLabeled_Matrix);
+}
+
+void printLabeledMatrix(const LabeledMatrix *pLabeled_Matrix, char type[]) {
+    printf("Label: %d\n", pLabeled_Matrix->label);
+    printMatrix(pLabeled_Matrix->matrix, type);
+}
+
 /* Allocates a MatrixList of 'length' matrices, each of size rows x columns. Returns NULL on failure. */
-MatrixList * createMatrixList(uint32_t length, uint32_t rows, uint32_t columns) {
-    size_t MatrixList_mem_req = sizeof(MatrixList);
-    MatrixList * matrix_list = malloc(MatrixList_mem_req);
-    if(matrix_list == NULL) {
+LabeledMatrixList *createLabeledMatrixList(uint32_t pLabeled_matrix_list_length, uint32_t pRows, uint32_t pColumns) {
+    size_t labeled_matrix_list_mem_req = sizeof(LabeledMatrixList);
+    LabeledMatrixList * labeled_matrix_list = malloc(labeled_matrix_list_mem_req);
+    if(labeled_matrix_list == NULL) {
         return NULL;
     }
 
-    matrix_list->list_length = length;
-    matrix_list->matrix_rows = rows;
-    matrix_list->matrix_columns = columns;
-    size_t Matrix_innerList_mem_req = sizeof(Matrix) * length;
+    labeled_matrix_list->list_length = pLabeled_matrix_list_length;
+    labeled_matrix_list->matrix_rows = pRows;
+    labeled_matrix_list->matrix_columns = pColumns;
 
-    matrix_list->list = malloc(Matrix_innerList_mem_req);
-    if(matrix_list->list == NULL) {
-        free(matrix_list);
+    size_t Matrix_innerList_mem_req = sizeof(LabeledMatrix) * pLabeled_matrix_list_length;
+    labeled_matrix_list->list = malloc(Matrix_innerList_mem_req);
+    if(labeled_matrix_list->list == NULL) {
+        free(labeled_matrix_list);
         return NULL;
     }
 
-    for(uint32_t i = 0; i < length; i++) {
-        matrix_list->list[i] = createMatrix(rows, columns);
-        if(matrix_list->list[i] == NULL) {
-            for(uint32_t j = 0; j < i; j++) {
-                freeMatrix(matrix_list->list[j]);
-            }
-            free(matrix_list->list);
-            free(matrix_list);
+    for(uint32_t i = 0; i < pLabeled_matrix_list_length; i++) {
+        labeled_matrix_list->list[i] = createLabeledMatrix(pRows, pColumns);
+        if(labeled_matrix_list->list[i] == NULL) {
+            freeLabeledMatrixList(labeled_matrix_list);
             return NULL;
         }
     }
-    return matrix_list;
+    return labeled_matrix_list;
 }
 
 /* Frees all matrices in the list, the list array, and the MatrixList itself. */
-void freeMatrixList(MatrixList *pMatrixList) {
-    for(uint32_t i = 0; i < pMatrixList->list_length; i++) {
-        freeMatrix(pMatrixList->list[i]);
+void freeLabeledMatrixList(LabeledMatrixList *pLabeled_matrix_list) {
+    for(uint32_t i = 0; i < pLabeled_matrix_list->list_length; i++) {
+        freeLabeledMatrix(pLabeled_matrix_list->list[i]);
     }
-    free(pMatrixList->list);
-    free(pMatrixList);
+    free(pLabeled_matrix_list->list);
+    free(pLabeled_matrix_list);
 }
 
 /* Prints all elements of a matrix row by row. pDataType: "int" or "float". */
@@ -90,27 +127,28 @@ void printMatrix(const Matrix *pMatrix, char *pDataType) {
 }
 
 /* Prints up to pPrintLimit matrices from the list. If pPrintLimit is 0, prints all. */
-void printMatrixList(const MatrixList * pMatrix_list, uint32_t pPrintLimit, char *pDataType) {
+void printLabeledMatrixList(const LabeledMatrixList * pLabeled_matrix_list, uint32_t pPrint_limit, char *pData_type) {
     uint32_t printLimit = 0;
-    if(pPrintLimit > 0) {
-        printLimit = pPrintLimit;
+    if(pPrint_limit > 0) {
+        printLimit = pPrint_limit;
     } else {
-        printLimit = pMatrix_list->list_length;
+        printLimit = pLabeled_matrix_list->list_length;
     }
 
     for(uint32_t i = 0; i < printLimit; i++) {
-        printf("%d.th Matrix \n", i + 1);
-        if(strcmp(pDataType, "int") == 0) {
-                printMatrix(pMatrix_list->list[i], "int");
-            } else if(strcmp(pDataType, "float") == 0) {
-                printMatrix(pMatrix_list->list[i], "float");
+        uint8_t label = pLabeled_matrix_list->list[i]->label;
+        printf("%d.th Matrix \nLabel: %d\n", i + 1, label);
+        if(strcmp(pData_type, "int") == 0) {
+                printMatrix(pLabeled_matrix_list->list[i]->matrix, "int");
+            } else if(strcmp(pData_type, "float") == 0) {
+                printMatrix(pLabeled_matrix_list->list[i]->matrix, "float");
         }
     }
 }
 
 /* Flattens all matrices in the list into a single column vector. Returns NULL on failure. */
-Matrix *MatrixListToVector(const MatrixList *pMatrixList) {
-    if(pMatrixList == NULL) {
+Matrix *MatrixListToVector(const LabeledMatrixList *pLabeled_matrix_list) {
+    if(pLabeled_matrix_list == NULL) {
         return NULL;
     }
     size_t matrix_mem_req = sizeof(Matrix);
@@ -118,8 +156,8 @@ Matrix *MatrixListToVector(const MatrixList *pMatrixList) {
     if(vector == NULL) {
         return NULL;
     }
-    uint32_t matrix_elements = pMatrixList->matrix_rows * pMatrixList->matrix_columns;
-    uint32_t vector_elements = pMatrixList->list_length * matrix_elements;
+    uint32_t matrix_elements = pLabeled_matrix_list->matrix_rows * pLabeled_matrix_list->matrix_columns;
+    uint32_t vector_elements = pLabeled_matrix_list->list_length * matrix_elements;
     size_t vector_elements_mem_req = sizeof(float) * vector_elements;
     vector->data = malloc(vector_elements_mem_req);
     if(vector->data == NULL) {
@@ -131,8 +169,8 @@ Matrix *MatrixListToVector(const MatrixList *pMatrixList) {
     vector->columns = 1;
 
     uint32_t vector_index = 0;
-    for(uint32_t i = 0; i < pMatrixList->list_length; i++) {
-        Matrix * current_matrix = pMatrixList->list[i];
+    for(uint32_t i = 0; i < pLabeled_matrix_list->list_length; i++) {
+        Matrix * current_matrix = pLabeled_matrix_list->list[i]->matrix;
         for(uint32_t j = 0; j < matrix_elements; j++) {
             float current_data = current_matrix->data[j];
             vector->data[vector_index] = current_data;
