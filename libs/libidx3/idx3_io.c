@@ -46,7 +46,7 @@ Bytes 16+: Raw pixel data as a continuous stream of unsigned bytes
 
 */
 /* Opens an IDX3 file at path, reads its metadata and pixel data, returns a MatrixList. Returns NULL on failure. */
-LabeledMatrixList *getIDXLabeledMatrixList(const char * pData_Path, const char * pLabel_Path) {
+LabeledMatrixList * getIDXLabeledMatrixList(const char * pData_Path, const char * pLabel_Path) {
     if(pData_Path == NULL || pLabel_Path == NULL) {
         return NULL;
     }

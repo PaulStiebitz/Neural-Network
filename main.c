@@ -11,7 +11,7 @@ int main(void) {
 
     LabeledMatrixList * labeled_matrix_list = getIDXLabeledMatrixList(trainingDataPath, trainingLabelPath);
 
-    printLabeledMatrixList(labeled_matrix_list, 10, "int");
+    printLabeledMatrixList(labeled_matrix_list, 100, "int");
     freeLabeledMatrixList(labeled_matrix_list);
 
     return 0;
