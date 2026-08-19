@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="LuvNz8N-qxXdFgCoaw2a">
-    <mxGraphModel dx="3334" dy="1664" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="1" shadow="0">
+    <mxGraphModel dx="3334" dy="1650" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="1" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -45,16 +45,16 @@
           <mxGeometry height="180" width="375" x="-800" y="102" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-2" parent="1" style="whiteSpace=wrap;html=1;strokeColor=#990099;" value="" vertex="1">
-          <mxGeometry height="320" width="320" x="480" y="700" as="geometry" />
+          <mxGeometry height="320" width="320" x="497.5" y="632" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-3" parent="1" style="whiteSpace=wrap;html=1;strokeColor=#0000CC;" value="" vertex="1">
-          <mxGeometry height="320" width="410" x="50" y="700" as="geometry" />
+          <mxGeometry height="320" width="410" x="67.5" y="632" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-4" parent="1" style="whiteSpace=wrap;html=1;strokeColor=#00994D;" value="" vertex="1">
-          <mxGeometry height="320" width="400" x="-380" y="700" as="geometry" />
+          <mxGeometry height="320" width="400" x="-362.5" y="632" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-5" parent="1" style="whiteSpace=wrap;html=1;strokeColor=light-dark(#FF0000,#FF0000);" value="" vertex="1">
-          <mxGeometry height="320" width="410" x="-817.5" y="700" as="geometry" />
+          <mxGeometry height="320" width="410" x="-800" y="632" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-8" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;\(&#xa;\begin{aligned}&#xa;&amp;amp;\textbf{Chain Rule}\\[4pt]&#xa;&amp;amp;\text{Backpropagation applies the chain rule from right to left.}\\[6pt]&#xa;&amp;amp;x \longrightarrow u \longrightarrow J&#xa;\qquad\Rightarrow\qquad&#xa;\frac{\partial J}{\partial x}&#xa;=&#xa;\frac{\partial J}{\partial u}&#xa;\frac{\partial u}{\partial x}.\\[8pt]&#xa;&amp;amp;J&#xa;\longrightarrow z^{[3]}&#xa;\longrightarrow a^{[2]}&#xa;\longrightarrow z^{[2]}&#xa;\longrightarrow a^{[1]}&#xa;\longrightarrow z^{[1]}.\\[8pt]&#xa;&amp;amp;\boxed{&#xa;\delta^{[l]}&#xa;:=&#xa;\frac{\partial J}{\partial z^{[l]}}&#xa;}\\[4pt]&#xa;&amp;amp;\delta^{[l]}&#xa;\text{ measures the sensitivity of the loss }J&#xa;\text{ to the pre-activation }z^{[l]}.&#xa;\end{aligned}&#xa;\)&lt;/div&gt;" vertex="1">
           <mxGeometry height="240" width="480" x="15" y="90" as="geometry" />
@@ -2497,16 +2497,16 @@
           <mxGeometry height="250" width="380" x="-370" y="90" as="geometry" />
         </mxCell>
         <mxCell id="60NHzaqf-IN3V2QFrPyz-1042" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;&lt;div style=&quot;line-height: 20px;&quot;&gt;\( \begin{aligned} &amp;amp;\textbf{Gradient Descent} \\[6pt] &amp;amp;\frac{\partial J}{\partial W^{[l]}} = \delta^{[l]} (a^{[l-1]})^T \\[10pt] &amp;amp;W^{[l]} \leftarrow W^{[l]} - \eta \frac{\partial J}{\partial W^{[l]}} \end{aligned} \)&lt;/div&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="140" width="190" x="-800" y="708" as="geometry" />
+          <mxGeometry height="140" width="190" x="-782.5" y="640" as="geometry" />
         </mxCell>
         <mxCell id="60NHzaqf-IN3V2QFrPyz-1043" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;&lt;div style=&quot;line-height: 20px;&quot;&gt;\( \begin{aligned} &amp;amp;\textbf{Hidden Layer 1} \\[6pt] &amp;amp;a^{[1]} = \operatorname{ReLU}(z^{[1]}) \\[8pt] &amp;amp;\operatorname{ReLU}&#39;(z) = \begin{cases} 1,&amp;amp;z&amp;gt;0\\ 0,&amp;amp;z\le0 \end{cases} \\[10pt] &amp;amp;\delta^{[1]} = ((W^{[2]})^T\delta^{[2]}) \odot \operatorname{ReLU}&#39;(z^{[1]}) \end{aligned} \)&lt;/div&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="190" width="270" x="-364" y="708" as="geometry" />
+          <mxGeometry height="190" width="270" x="-346.5" y="640" as="geometry" />
         </mxCell>
         <mxCell id="60NHzaqf-IN3V2QFrPyz-1044" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;&lt;div style=&quot;line-height: 20px;&quot;&gt;\( \begin{aligned} &amp;amp;\textbf{Hidden Layer 2} \\[6pt] &amp;amp;a^{[2]} = \operatorname{ReLU}(z^{[2]}) \\[8pt] &amp;amp;\operatorname{ReLU}&#39;(z) = \begin{cases} 1,&amp;amp;z&amp;gt;0\\ 0,&amp;amp;z\le0 \end{cases} \\[10pt] &amp;amp;\delta^{[2]} = ((W^{[3]})^T\delta^{[3]}) \odot \operatorname{ReLU}&#39;(z^{[2]}) \end{aligned} \)&lt;/div&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="190" width="270" x="76.5" y="708" as="geometry" />
+          <mxGeometry height="190" width="270" x="94" y="640" as="geometry" />
         </mxCell>
         <mxCell id="60NHzaqf-IN3V2QFrPyz-1045" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;&lt;div style=&quot;line-height: 20px;&quot;&gt;\( \begin{aligned} &amp;amp;\textbf{Output Layer} \\[6pt] &amp;amp;\hat{\mathbf y} = \operatorname{Softmax}(z^{[3]}) \\[8pt] &amp;amp;J(\mathbf y,\hat{\mathbf y}) = -\sum_{i=1}^{10} y_i\log(\hat y_i) \\[8pt] &amp;amp;\delta^{[3]} = \frac{\partial J}{\partial z^{[3]}} = \hat{\mathbf y}-\mathbf y \end{aligned} \)&lt;/div&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="180" width="160" x="495" y="713" as="geometry" />
+          <mxGeometry height="180" width="160" x="512.5" y="645" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
