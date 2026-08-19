@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="LuvNz8N-qxXdFgCoaw2a">
-    <mxGraphModel dx="3334" dy="1650" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="1" shadow="0">
+    <mxGraphModel dx="4456" dy="1201" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="1" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -14,47 +14,47 @@
           <mxGeometry height="210" width="141" x="500" y="191" as="geometry" />
         </mxCell>
         <mxCell id="PhsaqaotKz0VDQXHlX6H-14" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;\(J\in\mathbb{R}\)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="40" width="70" x="740.5" y="469" as="geometry" />
+          <mxGeometry height="40" width="70" x="750" y="462.33" as="geometry" />
         </mxCell>
         <mxCell id="PhsaqaotKz0VDQXHlX6H-1592" edge="1" parent="1" style="edgeStyle=none;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="580.5" y="500.8299999999999" as="sourcePoint" />
-            <mxPoint x="730.5" y="500.8299999999999" as="targetPoint" />
+            <mxPoint x="750" y="500.76" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="PhsaqaotKz0VDQXHlX6H-1595" connectable="0" parent="PhsaqaotKz0VDQXHlX6H-1592" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Cross Entropy loss" vertex="1">
+        <mxCell id="PhsaqaotKz0VDQXHlX6H-1595" connectable="0" parent="PhsaqaotKz0VDQXHlX6H-1592" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font face=&quot;Mathjax&quot; style=&quot;font-size: 18px;&quot;&gt;Cross Entropy loss&lt;/font&gt;" vertex="1">
           <mxGeometry relative="1" x="-0.6741" y="-2" as="geometry">
-            <mxPoint x="55" y="-14" as="offset" />
+            <mxPoint x="55" y="-18" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="PhsaqaotKz0VDQXHlX6H-1672" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="634.5" y="299" />
-              <mxPoint x="644.5" y="299" />
-              <mxPoint x="644.5" y="469" />
+              <mxPoint x="644.49" y="299" />
+              <mxPoint x="644.49" y="460" />
+              <mxPoint x="730.51" y="460" />
             </Array>
             <mxPoint x="634.5" y="299" as="sourcePoint" />
-            <mxPoint x="730.5" y="469" as="targetPoint" />
+            <mxPoint x="750" y="460" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="PhsaqaotKz0VDQXHlX6H-1675" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 11px; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;Target vector&lt;/span&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="24" width="70" x="654.5" y="445" as="geometry" />
+        <mxCell id="PhsaqaotKz0VDQXHlX6H-1675" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;&lt;font face=&quot;Mathjax&quot; style=&quot;font-size: 18px;&quot;&gt;Target vector&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="24" width="70" x="650" y="427" as="geometry" />
         </mxCell>
-        <mxCell id="PhsaqaotKz0VDQXHlX6H-1677" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;text-align: justify; font-size: 14px; font-style: normal; font-weight: 400; line-height: 20px;&quot;&gt;&lt;font face=&quot;Mathjax&quot;&gt;The backward pass is the process of propagating the prediction error backward through the neural network to update its parameters. Starting from the output layer, the loss function measures the difference between the predicted and the true label. Using backpropagation, gradients of the loss with respect to the weights and biases are computed layer by layer in reverse order. These gradients indicate how much each parameter contributes to the error. Finally, an optimization algorithm such as gradient descent adjusts the weights and biases to minimize the loss and improve the network&#39;s performance on future predictions.&lt;/font&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="PhsaqaotKz0VDQXHlX6H-1677" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;text-align: justify; font-style: normal; font-weight: 400; line-height: 20px;&quot;&gt;&lt;font face=&quot;Mathjax&quot; style=&quot;font-size: 18px;&quot;&gt;The backward pass is the process of propagating the prediction error backward through the neural network to update its parameters. Starting from the output layer, the loss function measures the difference between the predicted and the true label. Using backpropagation, gradients of the loss with respect to the weights and biases are computed layer by layer in reverse order. These gradients indicate how much each parameter contributes to the error. Finally, an optimization algorithm such as gradient descent adjusts the weights and biases to minimize the loss and improve the network&#39;s performance on future predictions.&lt;/font&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="180" width="375" x="-800" y="102" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-2" parent="1" style="whiteSpace=wrap;html=1;strokeColor=#990099;" value="" vertex="1">
-          <mxGeometry height="320" width="320" x="497.5" y="632" as="geometry" />
+          <mxGeometry height="250" width="320" x="497.5" y="632" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-3" parent="1" style="whiteSpace=wrap;html=1;strokeColor=#0000CC;" value="" vertex="1">
-          <mxGeometry height="320" width="410" x="67.5" y="632" as="geometry" />
+          <mxGeometry height="250" width="410" x="67.5" y="632" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-4" parent="1" style="whiteSpace=wrap;html=1;strokeColor=#00994D;" value="" vertex="1">
-          <mxGeometry height="320" width="400" x="-362.5" y="632" as="geometry" />
+          <mxGeometry height="250" width="400" x="-362.5" y="632" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-5" parent="1" style="whiteSpace=wrap;html=1;strokeColor=light-dark(#FF0000,#FF0000);" value="" vertex="1">
-          <mxGeometry height="320" width="410" x="-800" y="632" as="geometry" />
+          <mxGeometry height="250" width="410" x="-800" y="632" as="geometry" />
         </mxCell>
         <mxCell id="LIWczN0VXvvLiTBx41wX-8" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;\(&#xa;\begin{aligned}&#xa;&amp;amp;\textbf{Chain Rule}\\[4pt]&#xa;&amp;amp;\text{Backpropagation applies the chain rule from right to left.}\\[6pt]&#xa;&amp;amp;x \longrightarrow u \longrightarrow J&#xa;\qquad\Rightarrow\qquad&#xa;\frac{\partial J}{\partial x}&#xa;=&#xa;\frac{\partial J}{\partial u}&#xa;\frac{\partial u}{\partial x}.\\[8pt]&#xa;&amp;amp;J&#xa;\longrightarrow z^{[3]}&#xa;\longrightarrow a^{[2]}&#xa;\longrightarrow z^{[2]}&#xa;\longrightarrow a^{[1]}&#xa;\longrightarrow z^{[1]}.\\[8pt]&#xa;&amp;amp;\boxed{&#xa;\delta^{[l]}&#xa;:=&#xa;\frac{\partial J}{\partial z^{[l]}}&#xa;}\\[4pt]&#xa;&amp;amp;\delta^{[l]}&#xa;\text{ measures the sensitivity of the loss }J&#xa;\text{ to the pre-activation }z^{[l]}.&#xa;\end{aligned}&#xa;\)&lt;/div&gt;" vertex="1">
           <mxGeometry height="240" width="480" x="15" y="90" as="geometry" />
@@ -2496,7 +2496,7 @@
         <mxCell id="60NHzaqf-IN3V2QFrPyz-1041" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;\(&#xa;\begin{aligned}&#xa;&amp;amp;\textbf{Activation and Loss Derivatives}&#xa;\\[6pt]&#xa;&amp;amp;\operatorname{ReLU}&#39;(z)&#xa;=&#xa;\begin{cases}&#xa;1, &amp;amp; z&amp;gt;0,\\&#xa;0, &amp;amp; z\le 0,&#xa;\end{cases}&#xa;\\[10pt]&#xa;&amp;amp;J(\mathbf y,\hat{\mathbf y})&#xa;=&#xa;-\sum_{i=1}^{10}&#xa;y_i \log(\hat y_i)&#xa;\qquad&#xa;\text{(Cross-Entropy Loss)}&#xa;\\[10pt]&#xa;&amp;amp;\text{For Softmax output and Cross-Entropy loss:}&#xa;\\[6pt]&#xa;&amp;amp;\boxed{&#xa;\delta^{[3]}&#xa;=&#xa;\frac{\partial J}{\partial z^{[3]}}&#xa;=&#xa;\hat{\mathbf y}&#xa;-&#xa;\mathbf y&#xa;}&#xa;\end{aligned}&#xa;\)&lt;/div&gt;" vertex="1">
           <mxGeometry height="250" width="380" x="-370" y="90" as="geometry" />
         </mxCell>
-        <mxCell id="60NHzaqf-IN3V2QFrPyz-1042" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;&lt;div style=&quot;line-height: 20px;&quot;&gt;\( \begin{aligned} &amp;amp;\textbf{Gradient Descent} \\[6pt] &amp;amp;\frac{\partial J}{\partial W^{[l]}} = \delta^{[l]} (a^{[l-1]})^T \\[10pt] &amp;amp;W^{[l]} \leftarrow W^{[l]} - \eta \frac{\partial J}{\partial W^{[l]}} \end{aligned} \)&lt;/div&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="60NHzaqf-IN3V2QFrPyz-1042" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;&lt;div style=&quot;line-height: 20px;&quot;&gt;&lt;div style=&quot;line-height: 20px;&quot;&gt;\( \begin{aligned} &amp;amp;\textbf{Gradient Descent} \\[6pt] &amp;amp;\frac{\partial J}{\partial W^{[l]}} = \delta^{[l]}(a^{[l-1]})^T \\[8pt] &amp;amp;\frac{\partial J}{\partial b^{[l]}} = \delta^{[l]} \\[10pt] &amp;amp;W^{[l]} \leftarrow W^{[l]} -\eta\frac{\partial J}{\partial W^{[l]}} \\[8pt] &amp;amp;b^{[l]} \leftarrow b^{[l]} -\eta\frac{\partial J}{\partial b^{[l]}} \end{aligned} \)&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="140" width="190" x="-782.5" y="640" as="geometry" />
         </mxCell>
         <mxCell id="60NHzaqf-IN3V2QFrPyz-1043" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;font-family:&#39;Segoe UI&#39;;font-size:14px;font-style:normal;font-weight:400;line-height:20px&quot;&gt;&lt;div style=&quot;line-height: 20px;&quot;&gt;\( \begin{aligned} &amp;amp;\textbf{Hidden Layer 1} \\[6pt] &amp;amp;a^{[1]} = \operatorname{ReLU}(z^{[1]}) \\[8pt] &amp;amp;\operatorname{ReLU}&#39;(z) = \begin{cases} 1,&amp;amp;z&amp;gt;0\\ 0,&amp;amp;z\le0 \end{cases} \\[10pt] &amp;amp;\delta^{[1]} = ((W^{[2]})^T\delta^{[2]}) \odot \operatorname{ReLU}&#39;(z^{[1]}) \end{aligned} \)&lt;/div&gt;&lt;/div&gt;" vertex="1">
