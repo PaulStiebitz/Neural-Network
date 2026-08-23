@@ -5,6 +5,11 @@
 
 typedef struct {
     uint32_t rows;
+    float *data;
+} Vector;
+
+typedef struct {
+    uint32_t rows;
     uint32_t columns;
     float *data;
 } Matrix;

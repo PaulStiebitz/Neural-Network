@@ -38,7 +38,8 @@
   "C_Cpp_Runner.compilerArgs": [],
   "C_Cpp_Runner.linkerArgs": [
     "./libs/libidx3/idx3_io.c",
-    "./libs/matrix/matrix.c"
+    "./libs/matrix/matrix.c",
+    "./libs/nn/nn.c"
   ],
   "C_Cpp_Runner.includePaths": [],
   "C_Cpp_Runner.includeSearch": [
