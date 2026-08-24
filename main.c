@@ -13,7 +13,7 @@ int main(void) {
     // Load training data and labels
     printf("[IDXData] Get Training data\n");
     LabeledMatrixList *labeled_matrix_list = getIDXLabeledMatrixList(trainingDataPath, trainingLabelPath);
-    //printLabeledMatrixList(labeled_matrix_list, 100, "int");
+    //printLabeledMatrixList(labeled_matrix_list, 10, "int");
     /*
     Build Network
     Mnist Networks structure:

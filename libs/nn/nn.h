@@ -59,5 +59,6 @@ void testNeuralNetwork();
 void printNeuralNetworkLayer(NeuralNetworkLayer *pNeural_network_layer);
 void printNeuralNetwork(NeuralNetwork *pNeural_network);
 
+void fillWeightsRandom(Matrix *pMatrix);
 
 #endif

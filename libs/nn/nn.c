@@ -15,7 +15,7 @@ NeuralNetworkLayer *createNeuralNetworkLayer(uint32_t pNum_inputs, uint32_t pNum
     neural_network_layer->matrix_weights = createMatrix(pNum_neurons, pNum_inputs);
     if(neural_network_layer->matrix_weights == NULL)
         goto cleanup;
-
+    fillWeightsRandom(neural_network_layer->matrix_weights);
     neural_network_layer->vector_biases = createVector(pNum_neurons);
     if(neural_network_layer->vector_biases == NULL)
         goto cleanup;
@@ -129,4 +129,11 @@ void printNeuralNetwork(NeuralNetwork *pNeural_network) {
         printNeuralNetworkLayer(pNeural_network->layer_list[i]);
     }
     printf("\n");
+}
+
+void fillWeightsRandom(Matrix *pMatrix) {
+    uint32_t num_values = pMatrix->rows * pMatrix->columns;
+    for(uint32_t i = 0; i < num_values; i++) {
+        pMatrix->data[i] = ((float)rand() / RAND_MAX) - 0.5f;
+    }
 }

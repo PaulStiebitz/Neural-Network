@@ -35,9 +35,9 @@ void printVector(Vector *pVector) {
 
     for(uint32_t i = 0; i < pVector->rows; i++) {
         if(i+1 != pVector->rows) {
-            printf("%.3f, ", pVector->data[i]);
+            printf("%.2f, ", pVector->data[i]);
         } else {
-            printf("%.3f", pVector->data[i]);
+            printf("%.2f", pVector->data[i]);
         }
     }
     printf("\n");
@@ -157,7 +157,7 @@ void printMatrix(const Matrix *pMatrix, char *pDataType) {
             if(strcmp(pDataType, "int") == 0) {
                 printf("%d", (uint8_t)pMatrix->data[matrixIndex]);
             } else if(strcmp(pDataType, "float") == 0) {
-                printf("%.3f", pMatrix->data[matrixIndex]);
+                printf("%.2f ", pMatrix->data[matrixIndex]);
             }
             matrixIndex++;
         }
@@ -186,7 +186,8 @@ void printLabeledMatrixList(const LabeledMatrixList * pLabeled_matrix_list, uint
     }
 }
 
-/* Flattens all matrices in the list into a single column vector. Returns NULL on failure. */
+/*
+Flattens all matrices in the list into a single column vector. Returns NULL on failure.
 Matrix *MatrixListToVector(const LabeledMatrixList *pLabeled_matrix_list) {
     if(pLabeled_matrix_list == NULL) {
         return NULL;
@@ -219,3 +220,4 @@ Matrix *MatrixListToVector(const LabeledMatrixList *pLabeled_matrix_list) {
     }
     return vector;
 }
+*/
