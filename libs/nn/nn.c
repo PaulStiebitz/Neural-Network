@@ -1,7 +1,55 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "nn.h"
 #include "../matrix/matrix.h"
+
+NeuralNetworkLayer *createNeuralNetworkLayer(uint32_t pNum_inputs, uint32_t pNum_neurons) {
+    size_t neural_network_layer_mem_req = sizeof(NeuralNetworkLayer);
+    NeuralNetworkLayer *neural_network_layer = malloc(neural_network_layer_mem_req);
+    if(neural_network_layer == NULL) {
+        return NULL;
+    }
+    neural_network_layer->num_inputs = pNum_inputs;
+    neural_network_layer->num_neurons = pNum_neurons;
+    neural_network_layer->matrix_weights = createMatrix(pNum_neurons, pNum_inputs);
+    if(neural_network_layer->matrix_weights == NULL)
+        goto cleanup;
+
+    neural_network_layer->vector_biases = createVector(pNum_neurons);
+    if(neural_network_layer->vector_biases == NULL)
+        goto cleanup;
+
+    neural_network_layer->vector_preactivation_z = createVector(pNum_neurons);
+    if(neural_network_layer->vector_preactivation_z == NULL)
+        goto cleanup;
+
+    neural_network_layer->vector_activation_a = createVector(pNum_neurons);
+    if(neural_network_layer->vector_activation_a == NULL)
+        goto cleanup;
+
+    neural_network_layer->vector_error_delta = createVector(pNum_neurons);
+    if(neural_network_layer->vector_error_delta == NULL)
+        goto cleanup;
+
+    return neural_network_layer;
+
+    cleanup:
+        freeNeuralNetworkLayer(neural_network_layer);
+        return NULL;
+}
+
+void freeNeuralNetworkLayer(NeuralNetworkLayer *pNetwork_layer) {
+    if(pNetwork_layer == NULL) {
+        return;
+    }
+    freeMatrix(pNetwork_layer->matrix_weights);
+    freeVector(pNetwork_layer->vector_biases);
+    freeVector(pNetwork_layer->vector_preactivation_z);
+    freeVector(pNetwork_layer->vector_activation_a);
+    freeVector(pNetwork_layer->vector_error_delta);
+    free(pNetwork_layer);
+}
 
 /*
 Build the neural network with the folling config array:
@@ -10,37 +58,75 @@ pLayerConfig: the first value indicates the number of inputs.
 The remanining array indicitates the total number of neurons for the i-th layer, meanwhile
 the index i represents also the index of the array.
 */
-NeuralNetwork *buildNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config) {
-    size_t NeuralNetwork_mem_req = sizeof(NeuralNetwork);
-    NeuralNetwork *neural_network = malloc(NeuralNetwork_mem_req);
+NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config) {
+    size_t neural_network_mem_req = sizeof(NeuralNetwork);
+    NeuralNetwork *neural_network = malloc(neural_network_mem_req);
     if(neural_network == NULL) {
         return NULL;
     }
-
-    size_t layer_list_mem_req = pLayer_num * sizeof(NeuralNetworkLayer);
-    neural_network->layer_list = malloc(layer_list_mem_req);
+    neural_network->layer = pLayer_num;
+    size_t neural_network_layer_list_mem_req = pLayer_num * sizeof(NeuralNetworkLayer);
+    neural_network->layer_list = malloc(neural_network_layer_list_mem_req);
     if(neural_network->layer_list == NULL) {
+        free(neural_network->layer_list);
         free(neural_network);
         return NULL;
     }
 
     for(uint32_t i = 0; i < pLayer_num; i++) {
-        NeuralNetworkLayer *current_layer = neural_network->layer_list[i];
-        uint32_t layer_num_neurons = pLayer_config[i];
-        current_layer->num_neurons = layer_num_neurons;
-        /*
-        The first Hidden Layer doesn't have a previous layer, which means pStart_input_num
-        is used for num_inputs, matrix_weights and biases.
-         */
-        if(i == 0) {
-            current_layer->num_inputs = pStart_input_num;
-            current_layer->matrix_weights = createMatrix(layer_num_neurons, pStart_input_num);
-        } else {
-            uint32_t prev_layer_input_num = pLayer_config[i-1];
-            current_layer->num_inputs = prev_layer_input_num;
-            current_layer->matrix_weights = createMatrix(layer_num_neurons, prev_layer_input_num);
+        neural_network->layer_list[i] = malloc(neural_network_mem_req);
+        if(neural_network->layer_list[i] == NULL) {
+            for(uint32_t j = 0; j <= i; j++) {
+                freeNeuralNetworkLayer(neural_network->layer_list[i]);
+                free(neural_network);
+                return NULL;
+            }
         }
-
-        // Free Neural Network Layer ...
+        uint32_t num_neurons = pLayer_config[i];
+        if(i == 0) {
+            neural_network->layer_list[i] = createNeuralNetworkLayer(pStart_input_num, num_neurons);
+        } else {
+            uint32_t num_input = pLayer_config[i-1];
+            neural_network->layer_list[i] = createNeuralNetworkLayer(num_input, num_neurons);
+        }
     }
+    return neural_network;
+}
+
+void freeNeuralNetwork(NeuralNetwork *pNeural_network) {
+    if(pNeural_network == NULL) {
+        return;
+    }
+    for(uint32_t i = 0; i < pNeural_network->layer; i++) {
+        freeNeuralNetworkLayer(pNeural_network->layer_list[i]);
+    }
+
+    free(pNeural_network->layer_list);
+    free(pNeural_network);
+}
+
+void printNeuralNetworkLayer(NeuralNetworkLayer *pNeural_network_layer) {
+    printf("[NN] num_inputs: %d\n", pNeural_network_layer->num_inputs);
+    printf("[NN] num_neurons: %d\n", pNeural_network_layer->num_neurons);
+    printf("[NN] matrix_weights:\n");
+    printMatrix(pNeural_network_layer->matrix_weights, "float");
+    printf("[NN] vector_biases:\n");
+    printVector(pNeural_network_layer->vector_biases);
+    printf("[NN] vector_preactivation_z:\n");
+    printVector(pNeural_network_layer->vector_preactivation_z);
+    printf("[NN] vector_activation_a:\n");
+    printVector(pNeural_network_layer->vector_activation_a);
+    printf("[NN] vector_error_delta:\n");
+    printVector(pNeural_network_layer->vector_error_delta);
+}
+
+void printNeuralNetwork(NeuralNetwork *pNeural_network) {
+    printf("[NN] Printing neural network\n");
+    printf("Debugging Layers!!!: %d\n", pNeural_network->layer);
+    for(uint32_t i = 0; i < pNeural_network->layer; i++) {
+        uint32_t j = i;
+        printf("[NN] Printing Layer: %d\n", j + 1);
+        printNeuralNetworkLayer(pNeural_network->layer_list[i]);
+    }
+    printf("\n");
 }

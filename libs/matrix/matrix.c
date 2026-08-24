@@ -3,6 +3,46 @@
 #include <string.h>
 #include "matrix.h"
 
+
+Vector *createVector(uint32_t pRows) {
+    size_t vector_mem_req = sizeof(Vector);
+    Vector * vector = malloc(vector_mem_req);
+    if(vector == NULL) {
+        return NULL;
+    }
+    vector->rows = pRows;
+    size_t float_mem_req = sizeof(float);
+    vector->data = calloc(pRows, float_mem_req);
+    if(vector->data == NULL) {
+        free(vector);
+        return NULL;
+    }
+    return vector;
+}
+
+void freeVector(Vector *pVector) {
+    if(pVector == NULL) {
+        return;
+    }
+    free(pVector->data);
+    free(pVector);
+}
+
+void printVector(Vector *pVector) {
+    if(pVector == NULL) {
+        return;
+    }
+
+    for(uint32_t i = 0; i < pVector->rows; i++) {
+        if(i+1 != pVector->rows) {
+            printf("%.3f, ", pVector->data[i]);
+        } else {
+            printf("%.3f", pVector->data[i]);
+        }
+    }
+    printf("\n");
+}
+
 /* Allocates a Matrix with the given dimensions. Returns NULL on failure. */
 Matrix * createMatrix(uint32_t rows, uint32_t columns) {
     Matrix * matrix  = malloc(sizeof(Matrix));

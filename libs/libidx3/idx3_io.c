@@ -121,14 +121,15 @@ IDXMetadata readIDXMetadata(FILE *pIDX_file, char idx_format[]) {
         idxMetadata.matrix_columns = flip_endian(idxMetadata.matrix_columns);
     } else if(strcmp(idx_format, "IDX1") == 0) {
         idxMetadata.matrix_rows = 1;
+        idxMetadata.matrix_columns = 1;
     }
     // 1 Byte fields are already correct!
     idxMetadata.matrix_count = flip_endian(idxMetadata.matrix_count);
-    printf("Reading [IDXData]:\n"
+    printf("[IDXData] Reading:\n"
            "Dimension: %d\n"
            "Matrix count: %d\n"
            "Matrix rows: %d\n"
-           "Matrix columns: %d\n",
+           "Matrix columns: %d\n\n",
            idxMetadata.dimension, idxMetadata.matrix_count, idxMetadata.matrix_rows, idxMetadata.matrix_columns
           );
     return idxMetadata;

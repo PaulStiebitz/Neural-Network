@@ -5,19 +5,19 @@
 #include "../matrix/matrix.h"
 
 typedef struct {
-    uint32_t layer;
-    NeuralNetworkLayer *layer_list;
-} NeuralNetwork;
-
-typedef struct {
     uint32_t num_inputs;
     uint32_t num_neurons;
     Matrix *matrix_weights;
     Vector *vector_biases;
-    Vector vector_preactivation_z;
-    Vector vector_activation_a;
-    Vector vector_error_delta;
+    Vector *vector_preactivation_z;
+    Vector *vector_activation_a;
+    Vector *vector_error_delta;
 } NeuralNetworkLayer;
+
+typedef struct {
+    uint32_t layer;
+    NeuralNetworkLayer **layer_list;
+} NeuralNetwork;
 
 /*
 Build the neural network with the folling config array:
@@ -26,10 +26,11 @@ pLayerConfig: the first value indicates the number of inputs.
 The remanining array indicitates the total number of neurons for the i-th layer, meanwhile
 the index i represents also the index of the array.
 */
-NeuralNetwork *buildNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config);
-NeuralNetworkLayer *buildNeuralNetworkLayer(uint32_t pNum_inputs, uint32_t pNum_neurons);
+NeuralNetworkLayer *createNeuralNetworkLayer(uint32_t pNum_inputs, uint32_t pNum_neurons);
+NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config);
 
 // Free components from memory
+void freeNeuralNetworkLayer(NeuralNetworkLayer *pNetwork_layer);
 void freeNeuralNetwork(NeuralNetwork *pNeuralNetwork);
 
 // Forward Pass
@@ -54,5 +55,9 @@ void updateBias(Vector *pCurrent_bias, Vector *pCurrent_delta);
 // Training and testing the neural network
 void trainNeuralNetwork();
 void testNeuralNetwork();
+
+void printNeuralNetworkLayer(NeuralNetworkLayer *pNeural_network_layer);
+void printNeuralNetwork(NeuralNetwork *pNeural_network);
+
 
 #endif

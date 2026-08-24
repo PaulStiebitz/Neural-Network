@@ -26,7 +26,11 @@ typedef struct {
     LabeledMatrix ** list;
 } LabeledMatrixList;
 
-Matrix *createMatrix(uint32_t rows, uint32_t columns);
+Vector *createVector(uint32_t pRows);
+void freeVector(Vector *pVector);
+void printVector(Vector *pVector);
+
+Matrix *createMatrix(uint32_t pRows, uint32_t pColumns);
 void freeMatrix(Matrix *pMatrix);
 void printMatrix(const Matrix *pMatrix, char pData_type[]);
 
