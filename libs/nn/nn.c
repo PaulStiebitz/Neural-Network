@@ -134,18 +134,12 @@ void printNeuralNetwork(NeuralNetwork *pNeural_network) {
 
 void trainNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *training_labeled_matrix_list) {
     for(uint32_t i = 0; i < training_labeled_matrix_list->list_length; i++) {
-        forwardPass(training_labeled_matrix_list->list[i], pNeural_network);
-        //backwardPass(training_labeled_matrix_list->list[i], pNeural_network);
+        forwardPass(training_labeled_matrix_list->list[i], pNeural_network, i);
+        backwardPass(training_labeled_matrix_list->list[i], pNeural_network);
     }
-    /*Debug
-    for(uint32_t i = 0; i < 1; i++) {
-        forwardPass(training_labeled_matrix_list->list[i], pNeural_network);
-        //backwardPass(training_labeled_matrix_list->list[i], pNeural_network);
-    }
-    */
 }
 
-void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network) {
+void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, uint32_t pMatrix_num) {
     uint32_t num_layers = pNeural_network->layer;
     for(uint32_t i = 0; i < num_layers; i++) {
         NeuralNetworkLayer *current_network_layer = pNeural_network->layer_list[i];
@@ -170,10 +164,22 @@ void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network)
         vectorPlusVector(current_layer_biases, current_layer_preactivation_z);
         if(i == num_layers - 1) {
             softmax(current_layer_preactivation_z, current_layer_activation_a);
+            uint32_t predicted_num = argmax(current_layer_activation_a);
+            if(predicted_num == UINT32_MAX) {
+                return;
+            }
+            float predicted_num_prob = current_layer_activation_a->data[predicted_num];
+            uint32_t actual_number = pLabeled_matrix->label;
+            //printMatrix(pLabeled_matrix->matrix, "float");
+            printf("[Pred] %d.Picture Predicted Number: %d Prob: %f, Actual number: %d\n", pMatrix_num, predicted_num, predicted_num_prob, actual_number);
         } else {
             relu_activation(current_layer_preactivation_z, current_layer_activation_a);
         }
     }
+}
+
+void backwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network) {
+
 }
 
 void relu_activation(Vector *pPre_activation, Vector *pReLU_destination) {
@@ -220,5 +226,20 @@ void softmax(Vector *pActivation, Vector *pSoftmax_destination) {
     }
 }
 
+uint32_t argmax(Vector *pSoftmax_vector) {
+    if(pSoftmax_vector == NULL) {
+        return UINT32_MAX;
+    }
+    float max_prob_value = 0;
+    uint32_t max_prob_index = 0;
+    for(uint32_t i = 0; i < pSoftmax_vector->rows; i++) {
+        float current_prob_value = pSoftmax_vector->data[i];
+        if(current_prob_value > max_prob_value) {
+            max_prob_value = current_prob_value;
+            max_prob_index = i;
+        }
+    }
+    return max_prob_index;
+}
 
 

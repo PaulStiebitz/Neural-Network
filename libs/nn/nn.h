@@ -35,13 +35,13 @@ NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_nu
 void printNeuralNetworkLayer(NeuralNetworkLayer *pNeural_network_layer);
 void freeNeuralNetworkLayer(NeuralNetworkLayer *pNetwork_layer);
 
-void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network);
+void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, uint32_t pMatrix_num);
 void backwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network);
 
 // Forward Pass
 void relu_activation(Vector *pPre_activation, Vector *pReLU_destination);
 void softmax(Vector *pActivation, Vector *pReLU_destination);
-uint32_t argmax(Vector *pProb);
+uint32_t argmax(Vector *pSoftmax_vector);
 
 // Backward Pass
 Vector *crossEntropyLoss(Vector *pProb, Vector *pTarget);
