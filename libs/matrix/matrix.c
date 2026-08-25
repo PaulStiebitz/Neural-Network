@@ -20,10 +20,42 @@ Vector *createVector(uint32_t pRows) {
     return vector;
 }
 
-void freeVector(Vector *pVector) {
-    if(pVector == NULL) {
+Vector *matrixToVector(Matrix *pMatrix) {
+    if(pMatrix == NULL) {
+        return NULL;
+    }
+    size_t vector_mem_req = sizeof(Vector);
+    Vector *temp_vector = malloc(vector_mem_req);
+    if(temp_vector == NULL) {
+        return NULL;
+    }
+    size_t float_mem_req = sizeof(float);
+    uint32_t num_data_fields = pMatrix->rows * pMatrix->columns;
+    temp_vector->data = calloc(num_data_fields, float_mem_req);
+    if(temp_vector->data == NULL) {
+        free(temp_vector);
+        return NULL;
+    }
+    temp_vector->rows = num_data_fields;
+
+    for(uint32_t i = 0; i < num_data_fields; i++) {
+        temp_vector->data[i] = pMatrix->data[i];
+    }
+    return temp_vector;
+}
+
+void normalizeVector(Vector *pVector, float pDivisor) {
+    if(pVector == NULL || pDivisor == 0.0f) {
         return;
     }
+    for(uint32_t i = 0; i < pVector->rows; i++) {
+        pVector->data[i] = pVector->data[i] / pDivisor;
+    }
+}
+
+void freeVector(Vector *pVector) {
+    if(pVector == NULL) {
+        return;    }
     free(pVector->data);
     free(pVector);
 }
@@ -68,6 +100,16 @@ void freeMatrix(Matrix *pMatrix) {
 
     free(pMatrix->data);
     free(pMatrix);
+}
+
+void fillMatrixRandom(Matrix *pMatrix) {
+    if(pMatrix == NULL) {
+        return;
+    }
+    uint32_t num_values = pMatrix->rows * pMatrix->columns;
+    for(uint32_t i = 0; i < num_values; i++) {
+        pMatrix->data[i] = ((float)rand() / RAND_MAX) - 0.5f;
+    }
 }
 
 LabeledMatrix * createLabeledMatrix(uint32_t pRows, uint32_t pColumns) {
@@ -123,8 +165,7 @@ LabeledMatrixList *createLabeledMatrixList(uint32_t pLabeled_matrix_list_length,
     labeled_matrix_list->matrix_rows = pRows;
     labeled_matrix_list->matrix_columns = pColumns;
 
-    size_t Matrix_innerList_mem_req = sizeof(LabeledMatrix) * pLabeled_matrix_list_length;
-    labeled_matrix_list->list = malloc(Matrix_innerList_mem_req);
+    labeled_matrix_list->list = calloc(pLabeled_matrix_list_length, sizeof(LabeledMatrix *));
     if(labeled_matrix_list->list == NULL) {
         free(labeled_matrix_list);
         return NULL;
@@ -142,6 +183,9 @@ LabeledMatrixList *createLabeledMatrixList(uint32_t pLabeled_matrix_list_length,
 
 /* Frees all matrices in the list, the list array, and the MatrixList itself. */
 void freeLabeledMatrixList(LabeledMatrixList *pLabeled_matrix_list) {
+    if(pLabeled_matrix_list == NULL) {
+        return;
+    }
     for(uint32_t i = 0; i < pLabeled_matrix_list->list_length; i++) {
         freeLabeledMatrix(pLabeled_matrix_list->list[i]);
     }
@@ -186,38 +230,32 @@ void printLabeledMatrixList(const LabeledMatrixList * pLabeled_matrix_list, uint
     }
 }
 
-/*
-Flattens all matrices in the list into a single column vector. Returns NULL on failure.
-Matrix *MatrixListToVector(const LabeledMatrixList *pLabeled_matrix_list) {
-    if(pLabeled_matrix_list == NULL) {
-        return NULL;
-    }
-    size_t matrix_mem_req = sizeof(Matrix);
-    Matrix * vector = malloc(matrix_mem_req);
-    if(vector == NULL) {
-        return NULL;
-    }
-    uint32_t matrix_elements = pLabeled_matrix_list->matrix_rows * pLabeled_matrix_list->matrix_columns;
-    uint32_t vector_elements = pLabeled_matrix_list->list_length * matrix_elements;
-    size_t vector_elements_mem_req = sizeof(float) * vector_elements;
-    vector->data = malloc(vector_elements_mem_req);
-    if(vector->data == NULL) {
-        free(vector);
-        return NULL;
+void matrixTimesVector(Matrix *pMatrix, Vector *pVector, Vector *pProduct_Destination) {
+    if(pMatrix == NULL || pProduct_Destination == NULL || pVector == NULL) {
+        return;
     }
 
-    vector->rows = vector_elements;
-    vector->columns = 1;
+    if(pMatrix->columns != pVector->rows || pProduct_Destination->rows != pMatrix->rows) {
+        return;
+    }
 
-    uint32_t vector_index = 0;
-    for(uint32_t i = 0; i < pLabeled_matrix_list->list_length; i++) {
-        Matrix * current_matrix = pLabeled_matrix_list->list[i]->matrix;
-        for(uint32_t j = 0; j < matrix_elements; j++) {
-            float current_data = current_matrix->data[j];
-            vector->data[vector_index] = current_data;
-            vector_index++;
+    for(uint32_t i = 0; i < pProduct_Destination->rows; i++) {
+        pProduct_Destination->data[i] = 0.0f;
+    }
+
+    for(uint32_t i = 0; i < pMatrix->rows; i++) {
+        for(uint32_t j = 0; j < pMatrix->columns; j++) {
+            uint32_t current_index = i * pMatrix->columns + j;
+            pProduct_Destination->data[i] += pMatrix->data[current_index] * pVector->data[j];
         }
     }
-    return vector;
 }
-*/
+
+void vectorPlusVector(Vector *pVector_a, Vector *pVector_b_destination) {
+    if(pVector_a == NULL || pVector_b_destination == NULL || pVector_a->rows != pVector_b_destination->rows) {
+        return;
+    }
+    for(uint32_t i = 0; i < pVector_b_destination->rows; i++) {
+        pVector_b_destination->data[i] =  pVector_b_destination->data[i] + pVector_a->data[i];
+    }
+}
