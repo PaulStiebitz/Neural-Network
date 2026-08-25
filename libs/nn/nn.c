@@ -1,12 +1,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "nn.h"
 #include "../matrix/matrix.h"
 
 NeuralNetworkLayer *createNeuralNetworkLayer(uint32_t pNum_inputs, uint32_t pNum_neurons) {
     size_t neural_network_layer_mem_req = sizeof(NeuralNetworkLayer);
-    NeuralNetworkLayer *neural_network_layer = malloc(neural_network_layer_mem_req);
+    NeuralNetworkLayer *neural_network_layer = calloc(1, neural_network_layer_mem_req);
     if(neural_network_layer == NULL) {
         return NULL;
     }
@@ -15,7 +16,7 @@ NeuralNetworkLayer *createNeuralNetworkLayer(uint32_t pNum_inputs, uint32_t pNum
     neural_network_layer->matrix_weights = createMatrix(pNum_neurons, pNum_inputs);
     if(neural_network_layer->matrix_weights == NULL)
         goto cleanup;
-    fillWeightsRandom(neural_network_layer->matrix_weights);
+    fillMatrixRandom(neural_network_layer->matrix_weights);
     neural_network_layer->vector_biases = createVector(pNum_neurons);
     if(neural_network_layer->vector_biases == NULL)
         goto cleanup;
@@ -58,36 +59,37 @@ pLayerConfig: the first value indicates the number of inputs.
 The remanining array indicitates the total number of neurons for the i-th layer, meanwhile
 the index i represents also the index of the array.
 */
-NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config) {
+NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config, float pLearning_rate) {
     size_t neural_network_mem_req = sizeof(NeuralNetwork);
     NeuralNetwork *neural_network = malloc(neural_network_mem_req);
     if(neural_network == NULL) {
         return NULL;
     }
     neural_network->layer = pLayer_num;
-    size_t neural_network_layer_list_mem_req = pLayer_num * sizeof(NeuralNetworkLayer);
+    neural_network->learning_rate = pLearning_rate;
+    size_t neural_network_layer_list_mem_req = pLayer_num * sizeof(NeuralNetworkLayer*);
     neural_network->layer_list = malloc(neural_network_layer_list_mem_req);
     if(neural_network->layer_list == NULL) {
-        free(neural_network->layer_list);
         free(neural_network);
         return NULL;
     }
 
     for(uint32_t i = 0; i < pLayer_num; i++) {
-        neural_network->layer_list[i] = malloc(neural_network_mem_req);
-        if(neural_network->layer_list[i] == NULL) {
-            for(uint32_t j = 0; j <= i; j++) {
-                freeNeuralNetworkLayer(neural_network->layer_list[i]);
-                free(neural_network);
-                return NULL;
-            }
-        }
         uint32_t num_neurons = pLayer_config[i];
         if(i == 0) {
             neural_network->layer_list[i] = createNeuralNetworkLayer(pStart_input_num, num_neurons);
         } else {
             uint32_t num_input = pLayer_config[i-1];
             neural_network->layer_list[i] = createNeuralNetworkLayer(num_input, num_neurons);
+        }
+
+        if(neural_network->layer_list[i] == NULL) {
+            for(uint32_t j = 0; j < i; j++) {
+                freeNeuralNetworkLayer(neural_network->layer_list[j]);
+            }
+            free(neural_network->layer_list);
+            free(neural_network);
+            return NULL;
         }
     }
     return neural_network;
@@ -124,16 +126,99 @@ void printNeuralNetwork(NeuralNetwork *pNeural_network) {
     printf("[NN] Printing neural network\n");
     printf("Debugging Layers!!!: %d\n", pNeural_network->layer);
     for(uint32_t i = 0; i < pNeural_network->layer; i++) {
-        uint32_t j = i;
-        printf("[NN] Printing Layer: %d\n", j + 1);
+        printf("[NN] Printing Layer: %d\n", i + 1);
         printNeuralNetworkLayer(pNeural_network->layer_list[i]);
     }
     printf("\n");
 }
 
-void fillWeightsRandom(Matrix *pMatrix) {
-    uint32_t num_values = pMatrix->rows * pMatrix->columns;
-    for(uint32_t i = 0; i < num_values; i++) {
-        pMatrix->data[i] = ((float)rand() / RAND_MAX) - 0.5f;
+void trainNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *training_labeled_matrix_list) {
+    for(uint32_t i = 0; i < training_labeled_matrix_list->list_length; i++) {
+        forwardPass(training_labeled_matrix_list->list[i], pNeural_network);
+        //backwardPass(training_labeled_matrix_list->list[i], pNeural_network);
+    }
+    /*Debug
+    for(uint32_t i = 0; i < 1; i++) {
+        forwardPass(training_labeled_matrix_list->list[i], pNeural_network);
+        //backwardPass(training_labeled_matrix_list->list[i], pNeural_network);
+    }
+    */
+}
+
+void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network) {
+    uint32_t num_layers = pNeural_network->layer;
+    for(uint32_t i = 0; i < num_layers; i++) {
+        NeuralNetworkLayer *current_network_layer = pNeural_network->layer_list[i];
+        Matrix *current_layer_weights = current_network_layer->matrix_weights;
+        Vector *current_layer_biases = current_network_layer->vector_biases;
+        Vector *current_layer_preactivation_z = current_network_layer->vector_preactivation_z;
+        Vector *current_layer_activation_a = current_network_layer->vector_activation_a;
+        if(i == 0) {
+            Vector *initial_matrix_input_vector = matrixToVector(pLabeled_matrix->matrix);
+            if(initial_matrix_input_vector == NULL) {
+                return;
+            }
+            normalizeVector(initial_matrix_input_vector, 255.0f);
+            matrixTimesVector(current_layer_weights, initial_matrix_input_vector, current_layer_preactivation_z);
+            free(initial_matrix_input_vector->data);
+            free(initial_matrix_input_vector);
+        } else {
+            NeuralNetworkLayer *prev_network_layer = pNeural_network->layer_list[i-1];
+            Vector *prev_layer_activation_a = prev_network_layer->vector_activation_a;
+            matrixTimesVector(current_layer_weights, prev_layer_activation_a, current_layer_preactivation_z);
+        }
+        vectorPlusVector(current_layer_biases, current_layer_preactivation_z);
+        if(i == num_layers - 1) {
+            softmax(current_layer_preactivation_z, current_layer_activation_a);
+        } else {
+            relu_activation(current_layer_preactivation_z, current_layer_activation_a);
+        }
     }
 }
+
+void relu_activation(Vector *pPre_activation, Vector *pReLU_destination) {
+    if(pPre_activation == NULL || pReLU_destination == NULL) {
+        return;
+    }
+
+    if(pPre_activation->rows != pReLU_destination->rows) {
+        return;
+    }
+
+    uint32_t vector_length = pPre_activation->rows;
+    for(uint32_t i = 0; i < vector_length; i++) {
+        if(pPre_activation->data[i] > 0) {
+            pReLU_destination->data[i] = pPre_activation->data[i];
+        } else if(pPre_activation->data[i] <= 0) {
+            pReLU_destination->data[i] = 0;
+        }
+    }
+}
+
+void softmax(Vector *pActivation, Vector *pSoftmax_destination) {
+    if(pActivation == NULL || pSoftmax_destination == NULL) {
+        return;
+    }
+    if(pActivation->rows != pSoftmax_destination->rows) {
+        return;
+    }
+    // substract numerical stability
+    float max_val = pActivation->data[0];
+    for(uint32_t i = 1; i < pActivation->rows; i++) {
+        if(pActivation->data[i] > max_val) {
+            max_val = pActivation->data[i];
+        }
+    }
+
+    float sum = 0.0f;
+    for(uint32_t j = 0; j < pActivation->rows; j++) {
+        sum += expf(pActivation->data[j] - max_val);
+    }
+
+    for(uint32_t i = 0; i < pActivation->rows; i++) {
+        pSoftmax_destination->data[i] = expf(pActivation->data[i] - max_val) / sum;
+    }
+}
+
+
+

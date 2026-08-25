@@ -16,27 +16,31 @@ typedef struct {
 
 typedef struct {
     uint32_t layer;
+    float learning_rate;
     NeuralNetworkLayer **layer_list;
 } NeuralNetwork;
 
 /*
 Build the neural network with the folling config array:
-pLayers: num of total layers
-pLayerConfig: the first value indicates the number of inputs.
-The remanining array indicitates the total number of neurons for the i-th layer, meanwhile
-the index i represents also the index of the array.
+pLayers: number of total layers
+pLayerConfig: number of neurons in the i-th layer of the config array
 */
 NeuralNetworkLayer *createNeuralNetworkLayer(uint32_t pNum_inputs, uint32_t pNum_neurons);
-NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config);
-
-// Free components from memory
-void freeNeuralNetworkLayer(NeuralNetworkLayer *pNetwork_layer);
+void trainNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *training_labeled_matrix_list);
+void testNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *testing_labeled_matrix_list);
+void printNeuralNetwork(NeuralNetwork *pNeural_network);
 void freeNeuralNetwork(NeuralNetwork *pNeuralNetwork);
 
+NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config, float pLearning_rate);
+void printNeuralNetworkLayer(NeuralNetworkLayer *pNeural_network_layer);
+void freeNeuralNetworkLayer(NeuralNetworkLayer *pNetwork_layer);
+
+void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network);
+void backwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network);
+
 // Forward Pass
-Vector *layerPreActivation(Matrix *pWeights, Vector *pLayer_input, Vector *pLayer_bias);
-Vector *relu_activation(Vector *pPre_activation);
-Vector *softmax(Vector *pPre_activation);
+void relu_activation(Vector *pPre_activation, Vector *pReLU_destination);
+void softmax(Vector *pActivation, Vector *pReLU_destination);
 uint32_t argmax(Vector *pProb);
 
 // Backward Pass
@@ -51,14 +55,5 @@ Vector *weightsLossDerivative(Vector *pLast_delta, Vector *pLayer_input);
 // Update weights and biases
 void updateWeights(Matrix *pCurrent_weights, Matrix *pWeightsLossDerivative);
 void updateBias(Vector *pCurrent_bias, Vector *pCurrent_delta);
-
-// Training and testing the neural network
-void trainNeuralNetwork();
-void testNeuralNetwork();
-
-void printNeuralNetworkLayer(NeuralNetworkLayer *pNeural_network_layer);
-void printNeuralNetwork(NeuralNetwork *pNeural_network);
-
-void fillWeightsRandom(Matrix *pMatrix);
 
 #endif

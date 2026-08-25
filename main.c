@@ -7,13 +7,24 @@
 #include "./libs/nn/nn.h"
 
 int main(void) {
+    // Training data
     const char trainingDataPath[] = "data/training/train-images.idx3-ubyte";
     const char trainingLabelPath[] = "data/training/train-labels.idx1-ubyte";
 
+    // Test Data
+    const char testDataPath[] = "data/testing/t10k-images.idx3-ubyte";
+    const char testLabelPath[] = "data/testing/t10k-labels.idx1-ubyte";
+
     // Load training data and labels
     printf("[IDXData] Get Training data\n");
-    LabeledMatrixList *labeled_matrix_list = getIDXLabeledMatrixList(trainingDataPath, trainingLabelPath);
-    //printLabeledMatrixList(labeled_matrix_list, 10, "int");
+    LabeledMatrixList *training_labeled_matrix_list = getIDXLabeledMatrixList(trainingDataPath, trainingLabelPath);
+    printLabeledMatrixList(training_labeled_matrix_list, 10, "int");
+
+    // Load testing data and labels
+    printf("[IDXData] Get Testing data\n");
+    LabeledMatrixList *testing_labeled_matrix_list = getIDXLabeledMatrixList(testDataPath, testLabelPath);
+    printLabeledMatrixList(testing_labeled_matrix_list, 10, "int");
+
     /*
     Build Network
     Mnist Networks structure:
@@ -32,16 +43,21 @@ int main(void) {
     uint32_t start_input_num = 784;
     uint32_t layer_num = 3;
     uint32_t layerConfig[] = {128, 64, 10};
+    float learning_rate = 0.01f;
 
     printf("[NN] Creating neural network\n");
-    NeuralNetwork *mnist_neural_network = createNeuralNetwork(start_input_num, layer_num, layerConfig);
+    NeuralNetwork *mnist_neural_network = createNeuralNetwork(start_input_num, layer_num, layerConfig, learning_rate);
     printNeuralNetwork(mnist_neural_network);
     // Train Network
+    trainNeuralNetwork(mnist_neural_network, training_labeled_matrix_list);
+    printNeuralNetwork(mnist_neural_network);
+    //forwardPass
 
     // Test Network
 
     // Free components
-    freeLabeledMatrixList(labeled_matrix_list);
+    freeLabeledMatrixList(training_labeled_matrix_list);
+    freeLabeledMatrixList(testing_labeled_matrix_list);
     freeNeuralNetwork(mnist_neural_network);
 
     return 0;
