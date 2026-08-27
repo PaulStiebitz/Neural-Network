@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "matrix.h"
 
 
@@ -106,9 +107,15 @@ void fillMatrixRandom(Matrix *pMatrix) {
     if(pMatrix == NULL) {
         return;
     }
+    // He-Initialisierung: stddev = sqrt(2 / num_inputs) — verhindert Exploding Gradients bei ReLU
+    float std_dev = sqrtf(2.0f / (float)pMatrix->columns);
     uint32_t num_values = pMatrix->rows * pMatrix->columns;
     for(uint32_t i = 0; i < num_values; i++) {
-        pMatrix->data[i] = ((float)rand() / RAND_MAX) - 0.5f;
+        // Box-Muller: zwei Uniform-Samples -> eine Normalverteilung
+        float u1 = ((float)(rand() + 1)) / ((float)RAND_MAX + 1.0f);
+        float u2 = ((float)rand()) / ((float)RAND_MAX + 1.0f);
+        float z  = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * 3.14159265f * u2);
+        pMatrix->data[i] = z * std_dev;
     }
 }
 
@@ -230,8 +237,8 @@ void printLabeledMatrixList(const LabeledMatrixList * pLabeled_matrix_list, uint
     }
 }
 
-void matrixTimesVector(Matrix *pMatrix, Vector *pVector, Vector *pProduct_Destination) {
-    if(pMatrix == NULL || pProduct_Destination == NULL || pVector == NULL) {
+void matrixTimesVector(Matrix *pMatrix, Vector *pVector, Vector *pProduct_Destination ) {
+    if(pMatrix == NULL || pVector == NULL || pProduct_Destination == NULL) {
         return;
     }
 
@@ -246,6 +253,29 @@ void matrixTimesVector(Matrix *pMatrix, Vector *pVector, Vector *pProduct_Destin
     for(uint32_t i = 0; i < pMatrix->rows; i++) {
         for(uint32_t j = 0; j < pMatrix->columns; j++) {
             uint32_t current_index = i * pMatrix->columns + j;
+            pProduct_Destination->data[i] += pMatrix->data[current_index] * pVector->data[j];
+        }
+    }
+}
+
+void matrixTransposeTimesVector(Matrix *pMatrix, Vector *pVector, Vector *pProduct_Destination) {
+    if(pMatrix == NULL || pVector == NULL || pProduct_Destination == NULL) {
+        return;
+    }
+
+    if(pMatrix->rows != pVector->rows || pProduct_Destination->rows != pMatrix->columns) {
+        return;
+    }
+
+    for(uint32_t i = 0; i < pProduct_Destination->rows; i++) {
+        pProduct_Destination->data[i] = 0.0f;
+    }
+
+    for(uint32_t i = 0; i < pMatrix->columns; i++) {
+        for(uint32_t j = 0; j < pMatrix->rows; j++) {
+
+            // Access to A[j][i]
+            uint32_t current_index = j * pMatrix->columns + i;
             pProduct_Destination->data[i] += pMatrix->data[current_index] * pVector->data[j];
         }
     }

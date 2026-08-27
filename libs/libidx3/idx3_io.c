@@ -166,17 +166,12 @@ void fillLabeledMatrix(FILE *pData_file, FILE * pLabel_file, LabeledMatrix *pLab
     fread(&tmp_label, sizeof(uint8_t), 1, pLabel_file);
     pLabeled_matrix->label = tmp_label;
 
-    uint8_t threshold = 127;
     uint32_t matrixIndex = 0;
     for(uint32_t i = 0; i < rows; i++) {
         for(uint32_t j = 0; j < columns; j++) {
             uint8_t tmp_pixel = 0;
             fread(&tmp_pixel, sizeof(uint8_t), 1, pData_file);
-            if(tmp_pixel >= threshold) {
-                 pLabeled_matrix->matrix->data[matrixIndex] = 1;
-            } else {
-                pLabeled_matrix->matrix->data[matrixIndex] = 0;
-            }
+            pLabeled_matrix->matrix->data[matrixIndex] = (float)tmp_pixel;
             matrixIndex++;
         }
     }

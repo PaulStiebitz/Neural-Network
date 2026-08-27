@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "../matrix/matrix.h"
 
+#define EPSILON 1e-15
+
 typedef struct {
     uint32_t num_inputs;
     uint32_t num_neurons;
@@ -35,25 +37,25 @@ NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_nu
 void printNeuralNetworkLayer(NeuralNetworkLayer *pNeural_network_layer);
 void freeNeuralNetworkLayer(NeuralNetworkLayer *pNetwork_layer);
 
-void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, uint32_t pMatrix_num);
-void backwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network);
+void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, Vector *pInitial_matrix_input_vector, uint32_t pMatrix_num, const char *pMode);
+void backwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, Vector *pInitial_matrix_input_vector, uint32_t pMatrix_num);
 
 // Forward Pass
 void relu_activation(Vector *pPre_activation, Vector *pReLU_destination);
+float reluDerivative(float z);
 void softmax(Vector *pActivation, Vector *pReLU_destination);
 uint32_t argmax(Vector *pSoftmax_vector);
 
 // Backward Pass
-Vector *crossEntropyLoss(Vector *pProb, Vector *pTarget);
+void printCrossEntropyLoss(uint32_t pActual_number, Vector *pActivation);
 // Cross Entropy loss derivative + softmax derivative in respect to z[3].
-Vector *ouputLayerDelta(Vector *pProb, Vector *pTarget);
+void softmaxCrossEntropyDerivative(uint32_t pActual_number, Vector *pActivation, Vector *pDestination_delta);
 // Generic layerDelta calculcation for all layers.
-Vector *layerDelta(Matrix *pWeights, Vector *pLast_delta, Vector *pForward_layer_preactivation_z);
-Vector *reluDerivative(Vector *pForward_layer_preactivation_z);
-Vector *weightsLossDerivative(Vector *pLast_delta, Vector *pLayer_input);
+void layerDelta(Matrix *pLast_Weights, Vector *pLast_delta, Vector *pCurrent_z, Vector *pDestination_delta);
 
 // Update weights and biases
-void updateWeights(Matrix *pCurrent_weights, Matrix *pWeightsLossDerivative);
-void updateBias(Vector *pCurrent_bias, Vector *pCurrent_delta);
+Matrix *weightsDerivative(Vector *pDelta, Vector *pPrev_activation);
+void updateWeights(float pLearning_rate, Matrix *pCurrent_weights, Vector *pDelta, Vector *pPrev_activation);
+void updateBias(float pLearning_rate, Vector *pCurrent_bias, Vector *pCurrent_delta);
 
 #endif

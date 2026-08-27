@@ -29,6 +29,7 @@ typedef struct {
 Vector *createVector(uint32_t pRows);
 Vector *matrixToVector(Matrix *pMatrix);
 void matrixTimesVector(Matrix *pMatrix, Vector *pVector, Vector *pProduct_Destination);
+void matrixTransposeTimesVector(Matrix *pMatrix, Vector *pVector, Vector *pProduct_Destination);
 void vectorPlusVector(Vector *pVector_a, Vector *pVector_b_destination);
 void normalizeVector(Vector *pVector, float pDivisor);
 void printVector(Vector *pVector);
