@@ -9,11 +9,11 @@
 /*
  * flip_endian, byte-reversal diagram
  *
- * Goal: convert  A B C D  ->  D C B A
+ * Goal: convert  A B C D to D C B A
  *
  * Step 1: num >> 24: 0 0 0 A      (move byte A to lowest position)
  * Step 2: num << 8:  B C D 0      (shift left; mask 0xff0000 keeps byte 2)
- * Step 3: num >> 8:  0 0 B C      (shift right; mask 0xff00   keeps byte 1)
+ * Step 3: num >> 8:  0 0 B C      (shift right; mask 0xff00 keeps byte 1)
  * Step 4: num << 24: D 0 0 0      (move byte D to highest position)
  *
  * OR-ing all four partial results gives D C B A.
@@ -23,10 +23,10 @@
    IDX files store multi-byte integers in big-endian order; this function
    converts them to the host's little-endian representation. */
 uint32_t flip_endian(uint32_t num) {
-    return ((num >> 24) & 0xff)       |  /* byte 3 -> byte 0 */
-           ((num << 8)  & 0xff0000)   |  /* byte 1 -> byte 2 */
-           ((num >> 8)  & 0xff00)     |  /* byte 2 -> byte 1 */
-           ((num << 24) & 0xff000000);   /* byte 0 -> byte 3 */
+    return ((num >> 24) & 0xff)       |  /* byte 3 to byte 0 */
+           ((num << 8)  & 0xff0000)   |  /* byte 1 to byte 2 */
+           ((num >> 8)  & 0xff00)     |  /* byte 2 to byte 1 */
+           ((num << 24) & 0xff000000);   /* byte 0 to byte 3 */
 }
 
 /* Opens the IDX3 image file at pData_Path and the IDX1 label file at
@@ -53,12 +53,11 @@ LabeledMatrixList *getIDXLabeledMatrixList(const char *pData_Path, const char *p
     readIDXMetadata(label_file, "IDX1");
 
     uint32_t data_matrix_list_length = idx_Data_Metadata.matrix_count;
-    uint32_t data_matrix_rows        = idx_Data_Metadata.matrix_rows;
-    uint32_t data_matrix_columns     = idx_Data_Metadata.matrix_columns;
+    uint32_t data_matrix_rows = idx_Data_Metadata.matrix_rows;
+    uint32_t data_matrix_columns = idx_Data_Metadata.matrix_columns;
 
     /* Allocate a list of empty LabeledMatrix structs with the correct dimensions. */
-    LabeledMatrixList *labeled_matrix_list = createLabeledMatrixList(
-        data_matrix_list_length, data_matrix_rows, data_matrix_columns);
+    LabeledMatrixList *labeled_matrix_list = createLabeledMatrixList(data_matrix_list_length, data_matrix_rows, data_matrix_columns);
 
     /* Read pixel data and labels into every entry of the list. */
     fillIDXLabeledMatrixList(data_file, label_file, labeled_matrix_list);
@@ -85,22 +84,22 @@ IDXMetadata readIDXMetadata(FILE *pIDX_file, char idx_format[]) {
     size_t size_uint8_t  = sizeof(uint8_t);
 
     /* Bytes 0-1: magic zero bytes. */
-    fread(idxMetadata.zero_bytes,    size_uint8_t,  2, pIDX_file);
+    fread(idxMetadata.zero_bytes, size_uint8_t,  2, pIDX_file);
     /* Byte 2: data type code (0x08 = unsigned byte). */
-    fread(&idxMetadata.bytes,        size_uint8_t,  1, pIDX_file);
+    fread(&idxMetadata.bytes, size_uint8_t,  1, pIDX_file);
     /* Byte 3: number of dimensions. */
-    fread(&idxMetadata.dimension,    size_uint8_t,  1, pIDX_file);
+    fread(&idxMetadata.dimension, size_uint8_t,  1, pIDX_file);
     /* Bytes 4-7: item count stored in big-endian. */
     fread(&idxMetadata.matrix_count, size_uint32_t, 1, pIDX_file);
 
     if(strcmp(idx_format, "IDX3") == 0) {
         /* Bytes 8-11 and 12-15: row and column counts (big-endian). */
-        fread(&idxMetadata.matrix_rows,    size_uint32_t, 1, pIDX_file);
+        fread(&idxMetadata.matrix_rows, size_uint32_t, 1, pIDX_file);
         fread(&idxMetadata.matrix_columns, size_uint32_t, 1, pIDX_file);
-        idxMetadata.matrix_rows    = flip_endian(idxMetadata.matrix_rows);
+        idxMetadata.matrix_rows = flip_endian(idxMetadata.matrix_rows);
         idxMetadata.matrix_columns = flip_endian(idxMetadata.matrix_columns);
     } else if(strcmp(idx_format, "IDX1") == 0) {
-        /* Labels are scalars -- treat each as a 1x1 matrix. */
+        /* Labels are scalarsm treat each as a 1x1 matrix. */
         idxMetadata.matrix_rows    = 1;
         idxMetadata.matrix_columns = 1;
     }
@@ -140,7 +139,7 @@ void fillLabeledMatrix(FILE *pData_file, FILE *pLabel_file, LabeledMatrix *pLabe
         return;
     }
 
-    uint32_t rows    = pLabeled_matrix->matrix->rows;
+    uint32_t rows = pLabeled_matrix->matrix->rows;
     uint32_t columns = pLabeled_matrix->matrix->columns;
 
     /* Read the single-byte class label (0-9 for MNIST). */

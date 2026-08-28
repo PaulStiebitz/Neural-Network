@@ -31,7 +31,7 @@ typedef struct {
     LabeledMatrix **list;           /* Heap-allocated array of pointers. */
 } LabeledMatrixList;
 
-/* -- Vector functions -- */
+/* Vector functions */
 
 /* Allocates a zero-initialised Vector of pRows elements. Returns NULL on failure. */
 Vector *createVector(uint32_t pRows);
@@ -60,7 +60,7 @@ void printVector(Vector *pVector);
 /* Frees a Vector and its data buffer. No-op if pVector is NULL. */
 void freeVector(Vector *pVector);
 
-/* -- Matrix functions -- */
+/* Matrix functions */
 
 /* Allocates an uninitialised Matrix of the given dimensions. Returns NULL on failure. */
 Matrix *createMatrix(uint32_t pRows, uint32_t pColumns);
@@ -76,7 +76,7 @@ void fillMatrixRandom(Matrix *pMatrix);
 /* Frees a Matrix and its data buffer. No-op if pMatrix is NULL. */
 void freeMatrix(Matrix *pMatrix);
 
-/* -- LabeledMatrix functions -- */
+/* LabeledMatrix functions */
 
 /* Allocates a LabeledMatrix with an uninitialised pixel buffer of rows x columns. */
 LabeledMatrix *createLabeledMatrix(uint32_t rows, uint32_t columns);
@@ -88,7 +88,7 @@ void printLabeledMatrix(const LabeledMatrix *pLabeled_Matrix, char type[]);
 /* Frees a LabeledMatrix and its inner Matrix. No-op if pLabeled_Matrix is NULL. */
 void freeLabeledMatrix(LabeledMatrix *pLabeled_Matrix);
 
-/* -- LabeledMatrixList functions -- */
+/* LabeledMatrixList functions */
 
 /* Allocates a LabeledMatrixList of pMatrix_list_length entries, each a
    rows x columns LabeledMatrix. Returns NULL on any allocation failure. */

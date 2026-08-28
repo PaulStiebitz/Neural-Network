@@ -73,8 +73,7 @@ void freeNeuralNetworkLayer(NeuralNetworkLayer *pNetwork_layer) {
    pLayer_config    : array of pLayer_num neuron counts, one per layer.
    pLearning_rate   : gradient-descent step size.
    On failure all already-created layers are freed before returning NULL. */
-NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num,
-                                   uint32_t *pLayer_config, float pLearning_rate) {
+NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config, float pLearning_rate) {
     NeuralNetwork *neural_network = malloc(sizeof(NeuralNetwork));
     if(neural_network == NULL) {
         return NULL;
@@ -149,8 +148,7 @@ void printNeuralNetwork(NeuralNetwork *pNeural_network) {
 
 /* Runs a forward pass on every sample in testing_labeled_matrix_list,
    counts correct predictions, and prints the overall accuracy. */
-void testNeuralNetwork(NeuralNetwork *pNeural_network,
-                       LabeledMatrixList *testing_labeled_matrix_list) {
+void testNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *testing_labeled_matrix_list) {
     uint32_t correct = 0;
     for(uint32_t matrix_num = 0; matrix_num < testing_labeled_matrix_list->list_length; matrix_num++) {
         Matrix *current_matrix = testing_labeled_matrix_list->list[matrix_num]->matrix;
@@ -159,8 +157,7 @@ void testNeuralNetwork(NeuralNetwork *pNeural_network,
         if(initial_matrix_input == NULL) {
             return;
         }
-        forwardPass(testing_labeled_matrix_list->list[matrix_num], pNeural_network,
-                    initial_matrix_input, matrix_num, "test");
+        forwardPass(testing_labeled_matrix_list->list[matrix_num], pNeural_network, initial_matrix_input, matrix_num, "test");
 
         /* Compare predicted class (argmax of output layer) against the ground truth. */
         NeuralNetworkLayer *last_layer = pNeural_network->layer_list[pNeural_network->layer - 1];
@@ -170,16 +167,13 @@ void testNeuralNetwork(NeuralNetwork *pNeural_network,
         }
         freeVector(initial_matrix_input);
     }
-    printf("[Test] Accuracy: %d/%d (%.2f%%)\n",
-           correct, testing_labeled_matrix_list->list_length,
-           100.0f * (float)correct / (float)testing_labeled_matrix_list->list_length);
+    printf("[Test] Accuracy: %d/%d (%.2f%%)\n", correct, testing_labeled_matrix_list->list_length, 100.0f * (float)correct / (float)testing_labeled_matrix_list->list_length);
 }
 
 /* Trains the network for one epoch over training_labeled_matrix_list.
    Applies a Fisher-Yates shuffle before iterating to reduce order bias,
    then performs forward pass + backward pass for every sample. */
-void trainNeuralNetwork(NeuralNetwork *pNeural_network,
-                        LabeledMatrixList *training_labeled_matrix_list) {
+void trainNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *training_labeled_matrix_list) {
     /* Fisher-Yates shuffle: randomise sample order for this epoch. */
     uint32_t list_length = training_labeled_matrix_list->list_length;
     for(uint32_t i = list_length - 1; i > 0; i--) {
@@ -196,10 +190,8 @@ void trainNeuralNetwork(NeuralNetwork *pNeural_network,
         if(initial_matrix_input == NULL) {
             return;
         }
-        forwardPass(training_labeled_matrix_list->list[matrix_num], pNeural_network,
-                    initial_matrix_input, matrix_num, "train");
-        backwardPass(training_labeled_matrix_list->list[matrix_num], pNeural_network,
-                     initial_matrix_input, matrix_num);
+        forwardPass(training_labeled_matrix_list->list[matrix_num], pNeural_network, initial_matrix_input, matrix_num, "train");
+        backwardPass(training_labeled_matrix_list->list[matrix_num], pNeural_network, initial_matrix_input);
         freeVector(initial_matrix_input);
     }
 }
@@ -208,16 +200,14 @@ void trainNeuralNetwork(NeuralNetwork *pNeural_network,
    Layer 0: normalises the raw pixel input to [0, 1] before multiplying by weights.
    Hidden layers: apply ReLU activation.
    Output layer:  applies Softmax; prints the prediction when pMode == "test". */
-void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network,
-                 Vector *pInitial_matrix_input_vector, uint32_t pMatrix_num,
-                 const char *pMode) {
+void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, Vector *pInitial_matrix_input_vector, uint32_t pMatrix_num, const char *pMode) {
     uint32_t num_layers = pNeural_network->layer;
     for(uint32_t i = 0; i < num_layers; i++) {
         NeuralNetworkLayer *current_network_layer  = pNeural_network->layer_list[i];
-        Matrix             *current_layer_weights  = current_network_layer->matrix_weights;
-        Vector             *current_layer_biases   = current_network_layer->vector_biases;
-        Vector             *current_layer_z        = current_network_layer->vector_preactivation_z;
-        Vector             *current_layer_a        = current_network_layer->vector_activation_a;
+        Matrix *current_layer_weights = current_network_layer->matrix_weights;
+        Vector *current_layer_biases = current_network_layer->vector_biases;
+        Vector *current_layer_z = current_network_layer->vector_preactivation_z;
+        Vector *current_layer_a = current_network_layer->vector_activation_a;
 
         if(i == 0) {
             /* Normalise raw pixel values from [0, 255] to [0, 1]. */
@@ -239,11 +229,10 @@ void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network,
             if(predicted_num == UINT32_MAX) {
                 return;
             }
-            float    predicted_prob = current_layer_a->data[predicted_num];
+            float predicted_prob = current_layer_a->data[predicted_num];
             uint32_t actual_number  = pLabeled_matrix->label;
             if(strcmp(pMode, "test") == 0) {
-                printf("[Pred] %d.Picture Predicted Number: %d Prob: %.3f, Actual number: %d\n",
-                       pMatrix_num, predicted_num, predicted_prob, actual_number);
+                printf("[Pred] %d.Picture Predicted Number: %d Prob: %.3f, Actual number: %d\n", pMatrix_num, predicted_num, predicted_prob, actual_number);
             }
         } else {
             /* Hidden layer: ReLU activation. */
@@ -254,32 +243,24 @@ void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network,
 
 /* Runs the backward pass from the output layer to layer 0.
    Computes per-layer error deltas and updates weights and biases in-place. */
-void backwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network,
-                  Vector *pInitial_matrix_input_vector, uint32_t pMatrix_num) {
+void backwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, Vector *pInitial_matrix_input_vector) {
     int32_t last_layer = (int32_t)pNeural_network->layer - 1;
     for(int32_t i = last_layer; i >= 0; i--) {
         NeuralNetworkLayer *current_layer = pNeural_network->layer_list[i];
-        Vector             *current_delta = current_layer->vector_error_delta;
+        Vector *current_delta = current_layer->vector_error_delta;
 
         if(i == last_layer) {
             /* Output layer: combined Softmax + cross-entropy gradient. */
-            softmaxCrossEntropyDerivative(pLabeled_matrix->label,
-                                          current_layer->vector_activation_a,
-                                          current_delta);
+            softmaxCrossEntropyDerivative(pLabeled_matrix->label, current_layer->vector_activation_a, current_delta);
         } else {
             /* Hidden layer: propagate gradient from the next layer. */
             NeuralNetworkLayer *next_layer = pNeural_network->layer_list[i + 1];
-            layerDelta(next_layer->matrix_weights, next_layer->vector_error_delta,
-                       current_layer->vector_preactivation_z, current_delta);
+            layerDelta(next_layer->matrix_weights, next_layer->vector_error_delta, current_layer->vector_preactivation_z, current_delta);
         }
 
         /* The activation feeding into this layer: raw input for layer 0, else previous a. */
-        Vector *prev_activation = (i == 0)
-            ? pInitial_matrix_input_vector
-            : pNeural_network->layer_list[i - 1]->vector_activation_a;
-
-        updateWeights(pNeural_network->learning_rate, current_layer->matrix_weights,
-                      current_delta, prev_activation);
+        Vector *prev_activation = (i == 0) ? pInitial_matrix_input_vector : pNeural_network->layer_list[i - 1]->vector_activation_a;
+        updateWeights(pNeural_network->learning_rate, current_layer->matrix_weights, current_delta, prev_activation);
         updateBias(pNeural_network->learning_rate, current_layer->vector_biases, current_delta);
     }
 }
@@ -295,9 +276,7 @@ void relu_activation(Vector *pPre_activation, Vector *pReLU_destination) {
     }
     uint32_t vector_length = pPre_activation->rows;
     for(uint32_t i = 0; i < vector_length; i++) {
-        pReLU_destination->data[i] = (pPre_activation->data[i] > 0)
-            ? pPre_activation->data[i]
-            : 0.0f;
+        pReLU_destination->data[i] = (pPre_activation->data[i] > 0) ? pPre_activation->data[i] : 0.0f;
     }
 }
 
@@ -339,7 +318,7 @@ uint32_t argmax(Vector *pSoftmax_vector) {
     if(pSoftmax_vector == NULL) {
         return UINT32_MAX;
     }
-    float    max_prob_value = 0.0f;
+    float max_prob_value = 0.0f;
     uint32_t max_prob_index = 0;
     for(uint32_t i = 0; i < pSoftmax_vector->rows; i++) {
         float current_prob_value = pSoftmax_vector->data[i];
@@ -370,8 +349,7 @@ void printCrossEntropyLoss(uint32_t pActual_number, Vector *pActivation) {
      delta[i] = a[i] - 1   if i == pActual_number  (correct class)
      delta[i] = a[i]        otherwise               (all other classes)
    No-op if either pointer is NULL or lengths differ. */
-void softmaxCrossEntropyDerivative(uint32_t pActual_number, Vector *pActivation,
-                                   Vector *pDestination_delta) {
+void softmaxCrossEntropyDerivative(uint32_t pActual_number, Vector *pActivation, Vector *pDestination_delta) {
     if(pActivation == NULL || pDestination_delta == NULL) {
         return;
     }
@@ -395,10 +373,8 @@ float reluDerivative(float z) {
 /* Computes the error delta for a hidden layer:
    delta = (W_next^T * delta_next) element-wise * ReLU'(z_current).
    No-op if any pointer is NULL. */
-void layerDelta(Matrix *pLast_Weights, Vector *pLast_delta,
-                Vector *pCurrent_z,    Vector *pDestination_delta) {
-    if(pLast_Weights == NULL || pLast_delta == NULL
-       || pCurrent_z == NULL || pDestination_delta == NULL) {
+void layerDelta(Matrix *pLast_Weights, Vector *pLast_delta, Vector *pCurrent_z,    Vector *pDestination_delta) {
+    if(pLast_Weights == NULL || pLast_delta == NULL || pCurrent_z == NULL || pDestination_delta == NULL) {
         return;
     }
     /* Backpropagate the gradient through the transposed weight matrix. */
@@ -433,8 +409,7 @@ Matrix *weightsDerivative(Vector *pDelta, Vector *pPrev_activation) {
    The gradient matrix dL/dW is computed, its L2-norm is calculated, and if the
    norm exceeds GRADIENT_CLIP the gradient is scaled down proportionally before
    applying: W -= learning_rate * scale * dL/dW. */
-void updateWeights(float pLearning_rate, Matrix *pCurrent_weights,
-                   Vector *pDelta, Vector *pPrev_activation) {
+void updateWeights(float pLearning_rate, Matrix *pCurrent_weights, Vector *pDelta, Vector *pPrev_activation) {
     if(pCurrent_weights == NULL || pDelta == NULL || pPrev_activation == NULL) {
         return;
     }
@@ -444,7 +419,7 @@ void updateWeights(float pLearning_rate, Matrix *pCurrent_weights,
     }
 
     /* Compute the L2-norm of the gradient matrix. */
-    float    norm  = 0.0f;
+    float norm  = 0.0f;
     uint32_t total = pCurrent_weights->rows * pCurrent_weights->columns;
     for(uint32_t k = 0; k < total; k++) {
         norm += gradient->data[k] * gradient->data[k];

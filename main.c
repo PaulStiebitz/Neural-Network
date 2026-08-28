@@ -8,9 +8,6 @@
 #include "./libs/nn/nn.h"
 
 int main(void) {
-    /* Seed the random number generator with the current time. */
-    srand((unsigned int)time(NULL));
-
     /* File paths for the MNIST training images and labels. */
     const char trainingDataPath[] = "data/training/train-images.idx3-ubyte";
     const char trainingLabelPath[] = "data/training/train-labels.idx1-ubyte";
@@ -33,10 +30,10 @@ int main(void) {
 
     /*
     MNIST network architecture:
-      Input layer  : 784 inputs  (28x28 pixels, flattened)
+      Input layer: 784 inputs  (28x28 pixels, flattened)
       Hidden layer 1: 128 neurons (ReLU)
       Hidden layer 2:  64 neurons (ReLU)
-      Output layer :  10 neurons (Softmax, one per digit class)
+      Output layer:  10 neurons (Softmax, one per digit class)
     */
     uint32_t start_input_num = 784;
     uint32_t layer_num = 3;
