@@ -15,7 +15,7 @@ A feedforward neural network written in C that trains and evaluates on the [MNIS
 
 - **Loss:** Cross-entropy
 - **Optimiser:** SGD with gradient clipping (L2-norm ≤ 1.0)
-- **Learning rate:** 0.001
+- **Learning rate:** 0.01
 - **Epochs:** 10
 - **Weight init:** Uniform random in `[-0.05, 0.05]`
 - **Training shuffle:** Fisher-Yates per epoch
