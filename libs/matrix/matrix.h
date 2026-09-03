@@ -6,29 +6,29 @@
 /* 1-D array of floats with an explicit length. */
 typedef struct {
     uint32_t rows; /* Number of elements. */
-    float   *data; /* Heap-allocated element array. */
+    float  *data; /* Heap-allocated element array. */
 } Vector;
 
 /* 2-D matrix stored in row-major order as a flat float array. */
 typedef struct {
     uint32_t rows;    /* Number of rows. */
     uint32_t columns; /* Number of columns. */
-    float   *data;    /* Heap-allocated data buffer (size = rows * columns). */
+    float *data;    /* Heap-allocated data buffer (size = rows * columns). */
 } Matrix;
 
 /* A matrix paired with a class label (e.g. a digit image and its digit 0-9). */
 typedef struct {
-    uint8_t  label;  /* Class label. */
-    Matrix  *matrix; /* Pixel data stored as floats. */
+    uint8_t label;  /* Class label. */
+    Matrix *matrix; /* Pixel data stored as floats. */
 } LabeledMatrix;
 
 /* An ordered collection of LabeledMatrix pointers, all sharing the same
    row and column dimensions. */
 typedef struct {
-    uint32_t        list_length;    /* Number of entries in the list. */
-    uint32_t        matrix_rows;    /* Rows of every matrix in the list. */
-    uint32_t        matrix_columns; /* Columns of every matrix in the list. */
-    LabeledMatrix **list;           /* Heap-allocated array of pointers. */
+    uint32_t list_length;    /* Number of entries in the list. */
+    uint32_t matrix_rows;    /* Rows of every matrix in the list. */
+    uint32_t matrix_columns; /* Columns of every matrix in the list. */
+    LabeledMatrix **list;    /* Heap-allocated array of pointers. */
 } LabeledMatrixList;
 
 /* Vector functions */

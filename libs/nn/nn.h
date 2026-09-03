@@ -13,18 +13,20 @@
 typedef struct {
     uint32_t num_inputs;              /* Number of inputs fed into this layer. */
     uint32_t num_neurons;             /* Number of neurons (outputs) in this layer. */
-    Matrix  *matrix_weights;          /* Weight matrix W  [num_neurons x num_inputs]. */
-    Vector  *vector_biases;           /* Bias vector b    [num_neurons]. */
-    Vector  *vector_preactivation_z;  /* Pre-activation z = W*a_prev + b  [num_neurons]. */
-    Vector  *vector_activation_a;     /* Activation a = f(z)              [num_neurons]. */
-    Vector  *vector_error_delta;      /* Error gradient delta for backprop [num_neurons]. */
+    Matrix *matrix_weights;          /* Weight matrix W  [num_neurons x num_inputs]. */
+    Matrix *matrix_weight_gradient; /* Weight gradient matrix Wd  [num_neurons x num_inputs]. */
+    Vector *vector_biases;           /* Bias vector b    [num_neurons]. */
+    Vector *vector_preactivation_z;  /* Pre-activation z = W*a_prev + b  [num_neurons]. */
+    Vector *vector_activation_a;     /* Activation a = f(z)              [num_neurons]. */
+    Vector *vector_error_delta;      /* Error gradient delta for backprop [num_neurons]. */
 } NeuralNetworkLayer;
 
 /* A fully-connected feedforward neural network. */
 typedef struct {
-    uint32_t            layer;       /* Total number of layers. */
-    float               learning_rate;
+    uint32_t layer;       /* Total number of layers. */
+    float learning_rate;
     NeuralNetworkLayer **layer_list; /* Heap-allocated array of layer pointers. */
+    Vector *vector_input_scratch;
 } NeuralNetwork;
 
 /* Construction / Destruction */
@@ -58,13 +60,12 @@ void trainNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *train
    prints the final classification accuracy. */
 void testNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *testing_labeled_matrix_list);
 
-/* Forward Pass/
+/* Forward Pass */
 
 /* Propagates one sample through the entire network.
-   pMode "train": silent.  pMode "test": prints prediction per sample. */
-void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network,
-                 Vector *pInitial_matrix_input_vector, uint32_t pMatrix_num,
-                 const char *pMode);
+   pPrint_prediction: 1 = print predicted class and probability, 0 = silent.
+   Using an int flag instead of a string avoids a strcmp() call per sample. */
+void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, Vector *pInitial_matrix_input_vector, uint32_t pMatrix_num, int pPrint_prediction);
 
 /* Applies ReLU element-wise: a = max(0, z). */
 void relu_activation(Vector *pPre_activation, Vector *pReLU_destination);
@@ -104,7 +105,7 @@ Matrix *weightsDerivative(Vector *pDelta, Vector *pPrev_activation);
 
 /* Updates the weight matrix in-place with gradient clipping (L2-norm <= GRADIENT_CLIP):
    W -= learning_rate * scale * dL/dW. */
-void updateWeights(float pLearning_rate, Matrix *pCurrent_weights, Vector *pDelta, Vector *pPrev_activation);
+void updateWeights(float pLearning_rate, Matrix *pCurrent_weights, Matrix *pGradient, Vector *pDelta, Vector *pPrev_activation);
 
 /* Updates the bias vector in-place: b -= learning_rate * delta. */
 void updateBias(float pLearning_rate, Vector *pCurrent_bias, Vector *pCurrent_delta);

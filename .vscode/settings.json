@@ -35,7 +35,10 @@
   ],
   "C_Cpp_Runner.enableWarnings": true,
   "C_Cpp_Runner.warningsAsError": false,
-  "C_Cpp_Runner.compilerArgs": [],
+  "C_Cpp_Runner.compilerArgs": [
+    "-O2",
+    "-march=native"
+  ],
   "C_Cpp_Runner.linkerArgs": [
     "./libs/libidx3/idx3_io.c",
     "./libs/matrix/matrix.c",
@@ -58,6 +61,6 @@
   "C_Cpp_Runner.useUndefinedSanitizer": false,
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
-  "C_Cpp_Runner.useLinkTimeOptimization": false,
+  "C_Cpp_Runner.useLinkTimeOptimization": true,
   "C_Cpp_Runner.msvcSecureNoWarnings": false
 }

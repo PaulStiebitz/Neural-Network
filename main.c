@@ -38,7 +38,7 @@ int main(void) {
     uint32_t start_input_num = 784;
     uint32_t layer_num = 3;
     uint32_t layerConfig[] = {128, 64, 10};
-    float learning_rate = 0.001f;
+    float learning_rate = 0.01f;
 
     /* Number of full passes over the training set. */
     uint32_t num_epochs = 10;

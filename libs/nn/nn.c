@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
 #include "nn.h"
 #include "../matrix/matrix.h"
 
@@ -26,6 +25,11 @@ NeuralNetworkLayer *createNeuralNetworkLayer(uint32_t pNum_inputs, uint32_t pNum
     if(neural_network_layer->matrix_weights == NULL)
         goto cleanup;
     fillMatrixRandom(neural_network_layer->matrix_weights);
+
+    /* Weight gradient matrix: num_neurons rows, num_inputs columns. */
+    neural_network_layer->matrix_weight_gradient = createMatrix(pNum_neurons, pNum_inputs);
+    if(neural_network_layer -> matrix_weight_gradient == NULL)
+        goto cleanup;
 
     /* Bias vector, one entry per neuron (zero-initialised). */
     neural_network_layer->vector_biases = createVector(pNum_neurons);
@@ -61,6 +65,7 @@ void freeNeuralNetworkLayer(NeuralNetworkLayer *pNetwork_layer) {
         return;
     }
     freeMatrix(pNetwork_layer->matrix_weights);
+    freeMatrix(pNetwork_layer->matrix_weight_gradient);
     freeVector(pNetwork_layer->vector_biases);
     freeVector(pNetwork_layer->vector_preactivation_z);
     freeVector(pNetwork_layer->vector_activation_a);
@@ -70,15 +75,15 @@ void freeNeuralNetworkLayer(NeuralNetworkLayer *pNetwork_layer) {
 
 /* Allocates a NeuralNetwork with pLayer_num fully-connected layers.
    pStart_input_num : number of raw inputs fed to layer 0.
-   pLayer_config    : array of pLayer_num neuron counts, one per layer.
-   pLearning_rate   : gradient-descent step size.
+   pLayer_config : array of pLayer_num neuron counts, one per layer.
+   pLearning_rate : gradient-descent step size.
    On failure all already-created layers are freed before returning NULL. */
 NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_num, uint32_t *pLayer_config, float pLearning_rate) {
     NeuralNetwork *neural_network = malloc(sizeof(NeuralNetwork));
     if(neural_network == NULL) {
         return NULL;
     }
-    neural_network->layer         = pLayer_num;
+    neural_network->layer = pLayer_num;
     neural_network->learning_rate = pLearning_rate;
 
     neural_network->layer_list = malloc(pLayer_num * sizeof(NeuralNetworkLayer *));
@@ -103,6 +108,17 @@ NeuralNetwork *createNeuralNetwork(uint32_t pStart_input_num, uint32_t pLayer_nu
             return NULL;
         }
     }
+
+    neural_network->vector_input_scratch = createVector(pStart_input_num);
+    if(neural_network->vector_input_scratch == NULL) {
+        // free all layers on null pointer
+        for(uint32_t j = 0; j < pLayer_num; j++) {
+            freeNeuralNetworkLayer(neural_network->layer_list[j]);
+        }
+        free(neural_network->layer_list);
+        free(neural_network);
+        return NULL;
+    }
     return neural_network;
 }
 
@@ -115,6 +131,7 @@ void freeNeuralNetwork(NeuralNetwork *pNeural_network) {
     for(uint32_t i = 0; i < pNeural_network->layer; i++) {
         freeNeuralNetworkLayer(pNeural_network->layer_list[i]);
     }
+    freeVector(pNeural_network->vector_input_scratch);
     free(pNeural_network->layer_list);
     free(pNeural_network);
 }
@@ -153,11 +170,14 @@ void testNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *testin
     for(uint32_t matrix_num = 0; matrix_num < testing_labeled_matrix_list->list_length; matrix_num++) {
         Matrix *current_matrix = testing_labeled_matrix_list->list[matrix_num]->matrix;
         /* Flatten the 2-D image into a 1-D input vector. */
-        Vector *initial_matrix_input = matrixToVector(current_matrix);
-        if(initial_matrix_input == NULL) {
-            return;
+        Vector *scratch  = pNeural_network->vector_input_scratch;
+        uint32_t num_elements = current_matrix->rows * current_matrix->columns;
+        for(uint32_t k = 0; k < num_elements; k++) {
+            scratch->data[k] = current_matrix->data[k];
         }
-        forwardPass(testing_labeled_matrix_list->list[matrix_num], pNeural_network, initial_matrix_input, matrix_num, "test");
+
+        /* 1 = print prediction per sample during testing. */
+        forwardPass(testing_labeled_matrix_list->list[matrix_num], pNeural_network, scratch, matrix_num, 1);
 
         /* Compare predicted class (argmax of output layer) against the ground truth. */
         NeuralNetworkLayer *last_layer = pNeural_network->layer_list[pNeural_network->layer - 1];
@@ -165,7 +185,6 @@ void testNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *testin
         if(predicted == testing_labeled_matrix_list->list[matrix_num]->label) {
             correct++;
         }
-        freeVector(initial_matrix_input);
     }
     printf("[Test] Accuracy: %d/%d (%.2f%%)\n", correct, testing_labeled_matrix_list->list_length, 100.0f * (float)correct / (float)testing_labeled_matrix_list->list_length);
 }
@@ -186,21 +205,24 @@ void trainNeuralNetwork(NeuralNetwork *pNeural_network, LabeledMatrixList *train
     for(uint32_t matrix_num = 0; matrix_num < training_labeled_matrix_list->list_length; matrix_num++) {
         Matrix *current_matrix = training_labeled_matrix_list->list[matrix_num]->matrix;
         /* Flatten the image to a vector for layer input. */
-        Vector *initial_matrix_input = matrixToVector(current_matrix);
-        if(initial_matrix_input == NULL) {
-            return;
+        Vector *scratch  = pNeural_network->vector_input_scratch;
+        uint32_t num_elements = current_matrix->rows * current_matrix->columns;
+        for(uint32_t k = 0; k < num_elements; k++) {
+            scratch->data[k] = current_matrix->data[k];
         }
-        forwardPass(training_labeled_matrix_list->list[matrix_num], pNeural_network, initial_matrix_input, matrix_num, "train");
-        backwardPass(training_labeled_matrix_list->list[matrix_num], pNeural_network, initial_matrix_input);
-        freeVector(initial_matrix_input);
+        /* 0 = silent during training, no per-sample output. */
+        forwardPass(training_labeled_matrix_list->list[matrix_num], pNeural_network, scratch, matrix_num, 0);
+        backwardPass(training_labeled_matrix_list->list[matrix_num], pNeural_network, scratch);
     }
 }
 
 /* Propagates pInitial_matrix_input_vector forward through every layer of the network.
    Layer 0: normalises the raw pixel input to [0, 1] before multiplying by weights.
    Hidden layers: apply ReLU activation.
-   Output layer:  applies Softmax; prints the prediction when pMode == "test". */
-void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, Vector *pInitial_matrix_input_vector, uint32_t pMatrix_num, const char *pMode) {
+   Output layer:  applies Softmax.
+   pPrint_prediction: 1 = print predicted class and probability, 0 = silent.
+   Passing an int flag avoids a strcmp() call on every sample during training. */
+void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network, Vector *pInitial_matrix_input_vector, uint32_t pMatrix_num, int pPrint_prediction) {
     uint32_t num_layers = pNeural_network->layer;
     for(uint32_t i = 0; i < num_layers; i++) {
         NeuralNetworkLayer *current_network_layer  = pNeural_network->layer_list[i];
@@ -231,7 +253,8 @@ void forwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network,
             }
             float predicted_prob = current_layer_a->data[predicted_num];
             uint32_t actual_number  = pLabeled_matrix->label;
-            if(strcmp(pMode, "test") == 0) {
+            /* Print only when the caller requested it (pPrint_prediction == 1). */
+            if(pPrint_prediction) {
                 printf("[Pred] %d.Picture Predicted Number: %d Prob: %.3f, Actual number: %d\n", pMatrix_num, predicted_num, predicted_prob, actual_number);
             }
         } else {
@@ -260,7 +283,7 @@ void backwardPass(LabeledMatrix *pLabeled_matrix, NeuralNetwork *pNeural_network
 
         /* The activation feeding into this layer: raw input for layer 0, else previous a. */
         Vector *prev_activation = (i == 0) ? pInitial_matrix_input_vector : pNeural_network->layer_list[i - 1]->vector_activation_a;
-        updateWeights(pNeural_network->learning_rate, current_layer->matrix_weights, current_delta, prev_activation);
+        updateWeights(pNeural_network->learning_rate, current_layer->matrix_weights,current_layer->matrix_weight_gradient, current_delta, prev_activation);
         updateBias(pNeural_network->learning_rate, current_layer->vector_biases, current_delta);
     }
 }
@@ -302,13 +325,14 @@ void softmax(Vector *pActivation, Vector *pSoftmax_destination) {
 
     /* Compute the normalisation denominator. */
     float sum = 0.0f;
-    for(uint32_t j = 0; j < pActivation->rows; j++) {
-        sum += expf(pActivation->data[j] - max_val);
+    for(uint32_t i = 0; i < pActivation->rows; i++) {
+        pSoftmax_destination->data[i] = expf(pActivation->data[i] - max_val);
+        sum +=pSoftmax_destination->data[i];
     }
 
     /* Write the final probabilities. */
     for(uint32_t i = 0; i < pActivation->rows; i++) {
-        pSoftmax_destination->data[i] = expf(pActivation->data[i] - max_val) / sum;
+        pSoftmax_destination->data[i] /= sum;
     }
 }
 
@@ -385,44 +409,25 @@ void layerDelta(Matrix *pLast_Weights, Vector *pLast_delta, Vector *pCurrent_z, 
     }
 }
 
-/* Allocates and returns the weight gradient matrix dL/dW = delta * a_prev^T.
-   Shape: [delta.rows x pPrev_activation.rows].
-   Returns NULL if either pointer is NULL or allocation fails. */
-Matrix *weightsDerivative(Vector *pDelta, Vector *pPrev_activation) {
-    if(pDelta == NULL || pPrev_activation == NULL) {
-        return NULL;
-    }
-    Matrix *gradient = createMatrix(pDelta->rows, pPrev_activation->rows);
-    if(gradient == NULL) {
-        return NULL;
-    }
-    for(uint32_t i = 0; i < pDelta->rows; i++) {
-        for(uint32_t j = 0; j < pPrev_activation->rows; j++) {
-            uint32_t index = i * gradient->columns + j;
-            gradient->data[index] = pDelta->data[i] * pPrev_activation->data[j];
-        }
-    }
-    return gradient;
-}
-
 /* Updates pCurrent_weights in-place using gradient descent with gradient clipping.
    The gradient matrix dL/dW is computed, its L2-norm is calculated, and if the
    norm exceeds GRADIENT_CLIP the gradient is scaled down proportionally before
    applying: W -= learning_rate * scale * dL/dW. */
-void updateWeights(float pLearning_rate, Matrix *pCurrent_weights, Vector *pDelta, Vector *pPrev_activation) {
-    if(pCurrent_weights == NULL || pDelta == NULL || pPrev_activation == NULL) {
-        return;
-    }
-    Matrix *gradient = weightsDerivative(pDelta, pPrev_activation);
-    if(gradient == NULL) {
+void updateWeights(float pLearning_rate, Matrix *pCurrent_weights, Matrix *pGradient, Vector *pDelta, Vector *pPrev_activation) {
+    if(pCurrent_weights == NULL || pGradient == NULL || pDelta == NULL || pPrev_activation == NULL) {
         return;
     }
 
+    for(uint32_t i = 0; i < pCurrent_weights->rows; i++) {
+        for(uint32_t j = 0; j < pCurrent_weights->columns; j++) {
+            pGradient->data[i * pGradient->columns + j] = pDelta->data[i] * pPrev_activation->data[j];
+        }
+    }
     /* Compute the L2-norm of the gradient matrix. */
     float norm  = 0.0f;
     uint32_t total = pCurrent_weights->rows * pCurrent_weights->columns;
     for(uint32_t k = 0; k < total; k++) {
-        norm += gradient->data[k] * gradient->data[k];
+        norm += pGradient->data[k] * pGradient->data[k];
     }
     norm = sqrtf(norm);
 
@@ -432,10 +437,9 @@ void updateWeights(float pLearning_rate, Matrix *pCurrent_weights, Vector *pDelt
     for(uint32_t i = 0; i < pCurrent_weights->rows; i++) {
         for(uint32_t j = 0; j < pCurrent_weights->columns; j++) {
             uint32_t index = i * pCurrent_weights->columns + j;
-            pCurrent_weights->data[index] -= pLearning_rate * gradient->data[index] * scale;
+            pCurrent_weights->data[index] -= pLearning_rate * pGradient->data[index] * scale;
         }
     }
-    freeMatrix(gradient);
 }
 
 /* Updates the bias vector in-place: b[i] -= learning_rate * delta[i].
