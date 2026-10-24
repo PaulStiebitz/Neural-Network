@@ -6,7 +6,7 @@ A feedforward neural network written in C that trains and evaluates on the [MNIS
 
 ## Demo
 
-[![Neural Network Demo](Documents/demo_preview.svg)](https://www.youtube.com/watch?v=w2KWXqCeTeQ)
+[![Neural Network Demo](Documents/demo_preview.png)](https://www.youtube.com/watch?v=w2KWXqCeTeQ)
 
 ---
 
