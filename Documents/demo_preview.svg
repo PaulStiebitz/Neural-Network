@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
+  <!-- Thumbnail (local file, same directory) -->
+  <image href="thumbnail.jpg" width="1280" height="720" />
+
+  <!-- Dark overlay circle -->
+  <circle cx="640" cy="360" r="80" fill="rgba(0,0,0,0.65)" />
+
+  <!-- Play triangle -->
+  <polygon points="618,325 618,395 695,360" fill="white" />
+</svg>
