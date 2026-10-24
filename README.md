@@ -4,6 +4,12 @@ A feedforward neural network written in C that trains and evaluates on the [MNIS
 
 ---
 
+## Demo
+
+[![Demo Video](https://img.youtube.com/vi/w2KWXqCeTeQ/0.jpg)](https://www.youtube.com/watch?v=w2KWXqCeTeQ)
+
+---
+
 ## Architecture
 
 | Layer | Type | Size | Activation |
