@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
-  <image href="https://raw.githubusercontent.com/PaulStiebitz/Neural-Network/main/Documents/thumbnail.png" width="1280" height="720" />
-  <circle cx="640" cy="360" r="80" fill="rgba(0,0,0,0.65)" />
-  <polygon points="618,325 618,395 695,360" fill="white" />
-</svg>
